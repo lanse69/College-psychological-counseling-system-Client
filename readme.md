@@ -2,6 +2,7 @@
 
 ## 📱 简介
 `PsyClient` 是高校心理咨询系统的用户终端。它采用 **Qt Quick (QML)** 构建现代化的用户界面，通过 TCP Socket 与服务端通信。
+
 **注意**：本客户端**不直接连接数据库**，所有数据交互均通过 JSON 请求发送至服务端。
 
 ## ✨ 功能特性
@@ -24,15 +25,25 @@
 
 ## 📂 目录结构
 PsyClient/
+
 ├── src/
+
 │   ├── network/        # TCP Socket 客户端 & 数据包分发器
+
 │   ├── controllers/    # C++ 逻辑控制层 (暴露给 QML 调用)
+
 │   ├── models/         # QAbstractListModel 数据模型
+
 │   └── main.cpp        # 程序入口
+
 ├── qml/
+
 │   ├── views/          # 页面视图 (Student, Doctor, Admin 文件夹)
+
 │   ├── components/     # 通用组件 (日历, 图表, 按钮)
+
 │   └── Main.qml        # 主窗口
+
 └── CMakeLists.txt      # 构建脚本
 
 ## 🛠️ 构建指南 (CMake)
@@ -44,7 +55,9 @@ PsyClient/
 
 ### 编译步骤
 mkdir build && cd build
+
 cmake ..
+
 cmake --build .
 
 ### 运行
@@ -55,4 +68,5 @@ cmake --build .
 
 ## ⚠️ 注意事项
 客户端 没有数据库驱动，所有数据均来自网络请求。
+
 必须配合 PsyServer 才能完成登录和业务操作。
