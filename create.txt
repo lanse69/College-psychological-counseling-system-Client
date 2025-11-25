@@ -1,0 +1,73 @@
+客户端工程 (PsyClient)
+
+客户端没有任何数据库代码，所有数据通过 TCP 请求获取。
+
+1. 客户端目录结构
+
+PsyClient/
+├── CMakeLists.txt                  # 构建脚本
+├── resources.qrc                   # 资源文件（QML, 图片, 图标）
+├── src/
+│   ├── main.cpp                    # 程序入口：注册 C++ 类到 QML，启动主窗口
+│   ├── config/
+│   │   └── ProtocolDefs.h          # 协议定义（需与服务端保持一致的副本）
+│   ├── network/
+│   │   ├── NetworkClient.h/cpp     # 单例：管理 QTcpSocket，处理断线重连，发送 JSON
+│   │   └── PacketDispatcher.h/cpp  # 接收服务端 JSON，根据 `type` 信号分发给不同的 Controller
+│   ├── controllers/                # 供 QML 调用的 C++ 逻辑控制类 (Q_INVOKABLE)
+│   │   ├── SessionController.h/cpp # 管理当前登录用户、SessionToken、页面跳转路由
+│   │   ├── StudentController.h/cpp # 学生操作：查医生、发起预约、提交问卷
+│   │   ├── DoctorController.h/cpp  # 医生操作：排班管理、处理修改请求、写报告
+│   │   └── AdminController.h/cpp   # 管理员操作：用户管理、获取报表数据
+│   └── models/                     # QAbstractListModel 实现类（用于 QML ListView 数据绑定）
+│       ├── DoctorListModel.h/cpp   # 医生列表数据源
+│       ├── BookingModel.h/cpp      # 预约记录列表数据源
+│       └── ChatModel.h/cpp         # 咨询记录列表
+├── qml/
+│   ├── Main.qml                    # 根窗口 (StackView)
+│   ├── globals/
+│   │   └── Theme.qml               # 全局样式（颜色、字体）
+│   ├── components/                 # 通用 UI 组件
+│   │   ├── CCalendar.qml           # 自定义日历控件（用于展示排班）
+│   │   ├── CChart.qml              # 图表控件（使用 Canvas 绘制统计图）
+│   │   └── CToast.qml              # 消息提示弹窗
+│   └── views/                      # 具体业务页面
+│       ├── LoginView.qml           # 登录/注册页
+│       ├── student/
+│       │   ├── StudentDash.qml     # 学生主控台
+│       │   ├── DoctorDetail.qml    # 医生详情与预约
+│       │   ├── MySchedule.qml      # 我的预约（含修改/取消逻辑）
+│       │   └── SurveyFill.qml      # 填写问卷页
+│       ├── doctor/
+│       │   ├── DoctorDash.qml      # 医生主控台
+│       │   ├── ScheduleMgr.qml     # 排班管理页（可点选时间段）
+│       │   ├── PatientView.qml     # 查看学生资料及问卷
+│       │   └── ReportWrite.qml     # 填写咨询报告
+│       └── admin/
+│           ├── AdminDash.qml       # 管理员主控台
+│           ├── UserEditor.qml      # 增删改查用户
+│           └── StatsView.qml       # 数据报表展示页
+
+2. 关键文件功能详解
+
+src/network/NetworkClient.cpp:
+功能: 负责底层的 socket 通信。
+接口: 提供 sendRequest(QJsonObject data)。
+信号: dataReceived(QJsonObject response)。它不知道业务逻辑，只管收发。
+
+src/controllers/StudentController.cpp:
+功能: 处理学生端的预约修改逻辑。
+流程: 当 QML 点击“修改预约” -> 调用此类的 modifyBooking() -> 封装 JSON {cmd: CMD_MODIFY, new_time: ...} -> 通过 NetworkClient 发送 -> 等待服务端响应 -> 若成功，发射信号刷新 BookingModel。
+
+src/controllers/DoctorController.cpp:
+功能: 处理医生端的“协商”逻辑。
+流程: 收到 notificationReceived 信号（来自服务端推送） -> 提示“学生申请修改时间” -> 医生点击“同意” -> 发送 JSON {cmd: CMD_CONFIRM_MODIFY, ...}。
+
+src/models/DoctorListModel.cpp:
+功能: 继承 QAbstractListModel。
+作用: 将 C++ 中的 QVector<DoctorInfo> 映射为 QML 可直接使用的 Model。
+QML 用法: ListView { model: doctorController.doctorListModel; delegate: DoctorCard {...} }。
+
+qml/views/admin/StatsView.qml:
+功能: 接收 AdminController 传来的 JSON 数组。
+实现: 使用 QML 的 Canvas 或者 Charts 模块，根据数据绘制柱状图（例如：X轴=月份，Y轴=咨询人数）。
