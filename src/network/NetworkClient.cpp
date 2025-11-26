@@ -1,6 +1,8 @@
 #include "NetworkClient.h"
-#include "config/ProtocolDefs.h" // 引用协议定义
+
 #include <QDebug>
+
+#include "config/ProtocolDefs.h" // 引用协议定义
 
 NetworkClient& NetworkClient::instance() {
     static NetworkClient _instance;

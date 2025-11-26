@@ -24,27 +24,19 @@
 - **数据可视化**: 导出并查看统计图表（咨询人数趋势、热门咨询问题、常预约时间段等）。
 
 ## 📂 目录结构
+```Text
 PsyClient/
-
 ├── src/
-
 │   ├── network/        # TCP Socket 客户端 & 数据包分发器
-
 │   ├── controllers/    # C++ 逻辑控制层 (暴露给 QML 调用)
-
 │   ├── models/         # QAbstractListModel 数据模型
-
 │   └── main.cpp        # 程序入口
-
 ├── qml/
-
 │   ├── views/          # 页面视图 (Student, Doctor, Admin 文件夹)
-
 │   ├── components/     # 通用组件 (日历, 图表, 按钮)
-
 │   └── Main.qml        # 主窗口
-
 └── CMakeLists.txt      # 构建脚本
+```
 
 ## 🛠️ 构建指南 (CMake)
 
@@ -54,14 +46,17 @@ PsyClient/
 - CMake (3.16+)
 
 ### 编译步骤
+```bash
 mkdir build && cd build
 
 cmake ..
 
 cmake --build .
-
+```
 ### 运行
+```bash
 ./PsyClient
+```
 
 ### 连接服务器
 在登录界面的设置或输入框中，确保目标 IP 和 端口 指向正在运行的 PsyServer。
