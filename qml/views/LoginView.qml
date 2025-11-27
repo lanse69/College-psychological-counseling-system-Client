@@ -6,6 +6,16 @@ Page {
     id: loginPage
     background: Rectangle { color: "#f0f2f5" }
 
+    // 页面显示时自动清空密码和错误信息
+    onVisibleChanged: {
+        if (visible) {
+            passField.text = ""
+            statusLabel.text = ""
+            // 页面出现时自动聚焦到用户名框
+            userField.forceActiveFocus()
+        }
+    }
+
     ColumnLayout {
         anchors.centerIn: parent
         spacing: 20
@@ -22,7 +32,7 @@ Page {
             Layout.fillWidth: true
             TextField {
                 id: ipField
-                text: "10.252.69.250" // 默认 IP
+                text: "10.252.69.250" // 默认IP
                 placeholderText: "Server IP"
                 Layout.fillWidth: true
             }
@@ -42,26 +52,41 @@ Page {
             font.pixelSize: 12
         }
 
+        // 用户名输入框
         TextField {
             id: userField
             placeholderText: "Username"
             Layout.fillWidth: true
+            selectByMouse: true
+
+            onAccepted: passField.forceActiveFocus()
         }
 
+        // 密码输入框
         TextField {
             id: passField
             placeholderText: "Password"
             echoMode: TextInput.Password
             Layout.fillWidth: true
+            selectByMouse: true
+
+            onAccepted: {
+                if (sessionCtrl.isConnected) {
+                    sessionCtrl.login(userField.text, passField.text)
+                } else {
+                    statusLabel.text = "请先连接服务器"
+                }
+            }
         }
 
         Button {
+            id: loginBtn
             text: "Login"
             Layout.fillWidth: true
             highlighted: true
             enabled: sessionCtrl.isConnected
             onClicked: {
-                sessionCtrl.login(userField.text, passField.text);
+                sessionCtrl.login(userField.text, passField.text)
             }
         }
 
@@ -89,6 +114,7 @@ Page {
         }
     }
 
+    // 自动连接
     Component.onCompleted: {
         sessionCtrl.connectHost(ipField.text, 9999)
     }

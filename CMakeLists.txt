@@ -20,7 +20,7 @@ qt_add_qml_module(appPsyClient
     SOURCES
         src/main.cpp
         src/config/ProtocolDefs.h
-        # src/controllers/AdminController.h src/controllers/AdminController.cpp
+        src/controllers/AdminController.h src/controllers/AdminController.cpp
         # src/controllers/DoctorController.h src/controllers/DoctorController.cpp
         src/controllers/SessionController.h src/controllers/SessionController.cpp
         # src/controllers/StudentController.h src/controllers/StudentController.cpp

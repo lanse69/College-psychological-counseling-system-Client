@@ -1,59 +1,63 @@
 import QtQuick
 import QtQuick.Controls
-import PsyClient
+import PsyClient 1.0
 
 ApplicationWindow {
+    id: appWindow
     visible: true
-    width: 800
-    height: 600
-    title: "PsyClient"
+    width: 1024
+    height: 768
+    title: "PsyClient - 高校心理咨询系统"
 
     SessionController {
         id: sessionCtrl
-        // 监听信号
-        onLoginSuccess: function(role) {
-            console.log("Login success logic here, role:", role)
 
-            // 根据角色跳转不同页面 
-            // 这里先用简单的 Text 占位，后续替换为具体 Dash 页面
+        onLoginSuccess: function(role) {
+            console.log("Login Success, Role:", role)
+            // 根据角色推入不同的界面
             if (role === 3) { // Admin
-                 stackView.push(adminComponent)
+                stackView.push("views/admin/AdminDash.qml")
             } else if (role === 2) { // Doctor
-                 stackView.push(doctorComponent)
+                // stackView.push("views/doctor/DoctorDash.qml")
+                showToast("医生界面开发中...", false)
             } else { // Student
-                 stackView.push(studentComponent)
+                // stackView.push("views/student/StudentDash.qml")
+                showToast("学生界面开发中...", false)
             }
+        }
+
+        onLoginFailed: function(msg) {
+            showToast(msg, true)
         }
     }
 
     StackView {
         id: stackView
         anchors.fill: parent
-        initialItem: LoginView {}
-    }
+        // 初始页面：登录页
+        initialItem: "views/LoginView.qml"
 
-    // --- 临时占位页面组件 ---
-    Component {
-        id: adminComponent
-        Page {
-            header: Label { text: "Admin Dashboard"; font.pixelSize: 20; padding: 10 }
-            Label { anchors.centerIn: parent; text: "Welcome Administrator!" }
+        // 页面切换动画
+        pushEnter: Transition {
+            PropertyAnimation { property: "opacity"; from: 0; to: 1; duration: 200 }
         }
-    }
-    
-    Component {
-        id: doctorComponent
-        Page {
-            header: Label { text: "Doctor Dashboard"; font.pixelSize: 20; padding: 10 }
-            Label { anchors.centerIn: parent; text: "Welcome Doctor!" }
+        pushExit: Transition {
+            PropertyAnimation { property: "opacity"; from: 1; to: 0; duration: 200 }
+        }
+        popEnter: Transition {
+            PropertyAnimation { property: "opacity"; from: 0; to: 1; duration: 200 }
+        }
+        popExit: Transition {
+            PropertyAnimation { property: "opacity"; from: 1; to: 0; duration: 200 }
         }
     }
 
-    Component {
-        id: studentComponent
-        Page {
-            header: Label { text: "Student Dashboard"; font.pixelSize: 20; padding: 10 }
-            Label { anchors.centerIn: parent; text: "Welcome Student!" }
-        }
+    // 全局消息提示 (Toast)
+    function showToast(msg, isError) {
+        toast.show(msg, isError ? "red" : "green")
+    }
+
+    CToast {
+        id: toast
     }
 }
