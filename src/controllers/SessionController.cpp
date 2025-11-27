@@ -3,22 +3,40 @@
 #include <QDebug>
 
 #include "network/NetworkClient.h"
+#include "config/ProtocolDefs.h"
 
-SessionController::SessionController(QObject *parent) : QObject(parent) {
+SessionController::SessionController(QObject *parent) : QObject(parent), m_role{0}, m_isConnected{false} {
     // 连接网络层的信号
     connect(&NetworkClient::instance(), &NetworkClient::responseReceived, 
             this, &SessionController::onResponseReceived);
+    // 连接底层网络状态变化的信号
+    connect(&NetworkClient::instance(), &NetworkClient::connectionStatusChanged,
+            this, &SessionController::onNetStatusChanged);
 }
 
-void SessionController::connectHost(const QString &ip, const int port = 9999) {
+void SessionController::connectHost(const QString &ip, const int port) {
+    if (NetworkClient::instance().isConnected()) {
+        qDebug() << "Already connected, skipping connectHost.";
+        return;
+    }
     NetworkClient::instance().connectToServer(ip, port);
+}
+
+void SessionController::onNetStatusChanged(bool connected) {
+    if (m_isConnected != connected) {
+        m_isConnected = connected;
+        emit connectionStatusChanged(connected);
+    }
+}
+
+bool SessionController::isConnected() const {
+    return m_isConnected;
 }
 
 void SessionController::login(const QString &username, const QString &password) {
     // 登录前检查连接状态
-    if (!NetworkClient::instance().isConnected()) {
-        qDebug() << "请确认服务端的IP未变化";
-        emit loginFailed("正在连接服务器，请稍后重试...");
+    if (!m_isConnected) {
+        emit loginFailed("未连接服务器，请检查 IP 设置");
         return;
     }
     
@@ -75,4 +93,12 @@ void SessionController::onResponseReceived(const QJsonObject &root) {
             emit bookingChangeRequested(requestData); // QML 监听此信号弹出“同意/拒绝”对话框
         }
     }
+}
+
+QString SessionController::currentUsername() const {
+    return m_username;
+}
+
+int SessionController::currentRole() const {
+    return m_role;
 }

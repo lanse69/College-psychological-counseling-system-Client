@@ -1,37 +1,34 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.28)
 
-project(PsyClient LANGUAGES CXX)
+project(PsyClient VERSION 0.1 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# 查找依赖
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick Network)
 
-# 开启 Qt 自动化工具
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-qt_standard_project_setup()
+qt_standard_project_setup(REQUIRES 6.8)
 
-qt_add_executable(PsyClient)
+qt_add_executable(appPsyClient)
 
-qt_add_qml_module(PsyClient
+qt_add_qml_module(appPsyClient
     URI PsyClient
     VERSION 1.0
     SOURCES
         src/main.cpp
         src/config/ProtocolDefs.h
-        src/controllers/AdminController.h src/controllers/AdminController.cpp
-        src/controllers/DoctorController.h src/controllers/DoctorController.cpp
+        # src/controllers/AdminController.h src/controllers/AdminController.cpp
+        # src/controllers/DoctorController.h src/controllers/DoctorController.cpp
         src/controllers/SessionController.h src/controllers/SessionController.cpp
-        src/controllers/StudentController.h src/controllers/StudentController.cpp
-        src/models/BookingModel.h src/models/BookingModel.cpp
-        src/models/ChatModel.h src/models/ChatModel.cpp
-        src/models/DoctorListModel.h src/models/DoctorListModel.cpp
+        # src/controllers/StudentController.h src/controllers/StudentController.cpp
+        # src/models/BookingModel.h src/models/BookingModel.cpp
+        # src/models/ChatModel.h src/models/ChatModel.cpp
+        # src/models/DoctorListModel.h src/models/DoctorListModel.cpp
         src/network/NetworkClient.h src/network/NetworkClient.cpp
-        src/network/PacketDispatcher.h src/network/PacketDispatcher.cpp
+        # src/network/PacketDispatcher.h src/network/PacketDispatcher.cpp
     QML_FILES
         qml/Main.qml
         qml/components/CCalendar.qml
@@ -53,20 +50,26 @@ qt_add_qml_module(PsyClient
     RESOURCES resources.qrc
 )
 
-# 链接库
-target_link_libraries(PsyClient PRIVATE 
+target_include_directories(appPsyClient PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/controllers"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/models"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/network"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/config"
+)
+
+set_target_properties(appPsyClient PROPERTIES
+    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+    MACOSX_BUNDLE TRUE
+    WIN32_EXECUTABLE TRUE
+)
+
+target_link_libraries(appPsyClient PRIVATE
     Qt6::Core 
     Qt6::Gui 
     Qt6::Qml 
     Qt6::Quick 
     Qt6::Network
-)
-
-target_include_directories(PsyClient PRIVATE 
-    "${CMAKE_CURRENT_SOURCE_DIR}/src"
-)
-
-set_target_properties(PsyClient PROPERTIES
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
 )
