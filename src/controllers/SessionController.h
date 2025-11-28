@@ -30,6 +30,7 @@ signals:
     void notificationReceived(const QString &msg);
     void bookingChangeRequested(const QJsonObject &details);
     void connectionStatusChanged(bool connected);
+    void sessionKicked(const QString &reason);
 
 private slots:
     // 接收网络层的回包

@@ -16,7 +16,7 @@ public:
     bool isConnected() const;
 
 signals:
-    // 收到服务端响应，分发给 Controller
+    // 收到服务端响应
     void responseReceived(const QJsonObject &data);
     void connectionStatusChanged(bool isConnected);
 

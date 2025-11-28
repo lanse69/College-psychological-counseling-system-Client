@@ -1,5 +1,6 @@
 #include "AdminController.h"
 
+#include <QCryptographicHash>
 #include <QDebug>
 
 #include "network/NetworkClient.h"
@@ -20,11 +21,13 @@ void AdminController::addUser(const QString &username, const QString &password,
         return;
     }
 
+    QString passwordHash = QString(QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256).toHex());
+
     QJsonObject req, data;
     req[JsonKeys::CMD] = (int)CmdType::ADMIN_ADD_USER;
 
     data[JsonKeys::USERNAME] = username;
-    data[JsonKeys::PASSWORD] = password;
+    data[JsonKeys::PASSWORD] = passwordHash;
     data[JsonKeys::ROLE] = role;
     data[JsonKeys::REAL_NAME] = realName;
 
@@ -65,7 +68,12 @@ void AdminController::updateUserInfo(int targetId, const QString &realName, cons
 
     data[JsonKeys::TARGET_ID] = targetId;
     data[JsonKeys::REAL_NAME] = realName;
-    data[JsonKeys::PASSWORD] = password; // 服务端会判断，为空则不改
+    if (!password.isEmpty()) {
+        QString passwordHash = QString(QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256).toHex());
+        data[JsonKeys::PASSWORD] = passwordHash;
+    } else {
+        data[JsonKeys::PASSWORD] = "";
+    }
 
     data[JsonKeys::INTRO] = intro;
     data[JsonKeys::SPEC] = spec;

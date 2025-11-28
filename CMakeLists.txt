@@ -28,7 +28,7 @@ qt_add_qml_module(appPsyClient
         # src/models/ChatModel.h src/models/ChatModel.cpp
         # src/models/DoctorListModel.h src/models/DoctorListModel.cpp
         src/network/NetworkClient.h src/network/NetworkClient.cpp
-        # src/network/PacketDispatcher.h src/network/PacketDispatcher.cpp
+        src/network/PacketDispatcher.h src/network/PacketDispatcher.cpp
     QML_FILES
         qml/Main.qml
         qml/components/CCalendar.qml

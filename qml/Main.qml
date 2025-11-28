@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import PsyClient 1.0
+import PsyClient
 
 ApplicationWindow {
     id: appWindow
@@ -28,6 +28,25 @@ ApplicationWindow {
 
         onLoginFailed: function(msg) {
             showToast(msg, true)
+        }
+
+        // 监听被踢信号
+        onSessionKicked: function(reason) {
+            console.log("账号被踢出:", reason)
+            showToast(reason, true)
+            // 回到初始页 (LoginView)
+            stackView.pop(null)
+        }
+
+        // 监听普通断线
+        onConnectionStatusChanged: function(connected) {
+            if (!connected) {
+                // 不在登录页（depth > 1），则退回登录页
+                if (stackView.depth > 1) {
+                    showToast("与服务器断开连接", true)
+                    stackView.pop(null)
+                }
+            }
         }
     }
 
