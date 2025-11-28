@@ -6,8 +6,8 @@ int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
-    app.setApplicationName("PsyClient");
-    app.setOrganizationName("University");
+    app.setApplicationName("高校心理咨询系统");
+    app.setOrganizationName("高校");
 
     QQmlApplicationEngine engine;
     

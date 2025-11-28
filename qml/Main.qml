@@ -7,13 +7,13 @@ ApplicationWindow {
     visible: true
     width: 1024
     height: 768
-    title: "PsyClient - 高校心理咨询系统"
+    title: "高校心理咨询系统"
 
     SessionController {
         id: sessionCtrl
 
         onLoginSuccess: function(role) {
-            console.log("Login Success, Role:", role)
+            console.log("登录成功, 角色:", role)
             // 根据角色推入不同的界面
             if (role === 3) { // Admin
                 stackView.push("views/admin/AdminDash.qml")

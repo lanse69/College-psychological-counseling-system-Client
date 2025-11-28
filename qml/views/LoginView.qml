@@ -11,8 +11,6 @@ Page {
         if (visible) {
             passField.text = ""
             statusLabel.text = ""
-            // 页面出现时自动聚焦到用户名框
-            userField.forceActiveFocus()
         }
     }
 
@@ -22,7 +20,7 @@ Page {
         width: 300
 
         Text {
-            text: "PsySystem Login"
+            text: "高校心理咨询系统 登录"
             font.pixelSize: 24
             font.bold: true
             Layout.alignment: Qt.AlignHCenter
@@ -32,13 +30,13 @@ Page {
             Layout.fillWidth: true
             TextField {
                 id: ipField
-                text: "10.252.69.250" // 默认IP
-                placeholderText: "Server IP"
+                text: "10.252.69.250"
+                placeholderText: "服务端 IP 地址"
                 Layout.fillWidth: true
             }
             Button {
-                text: sessionCtrl.isConnected ? "已连接" : "连接"
-                palette.button: sessionCtrl.isConnected ? "lightgreen" : undefined
+                text: sessionCtrl.isConnected ? "已连接至服务器" : "未连接服务器"
+                palette.button: sessionCtrl.isConnected ? "green" : "#d32f2f"
                 onClicked: {
                     sessionCtrl.connectHost(ipField.text, 9999)
                 }
@@ -55,7 +53,7 @@ Page {
         // 用户名输入框
         TextField {
             id: userField
-            placeholderText: "Username"
+            placeholderText: "用户名"
             Layout.fillWidth: true
             selectByMouse: true
 
@@ -65,7 +63,7 @@ Page {
         // 密码输入框
         TextField {
             id: passField
-            placeholderText: "Password"
+            placeholderText: "密码"
             echoMode: TextInput.Password
             Layout.fillWidth: true
             selectByMouse: true
@@ -81,7 +79,7 @@ Page {
 
         Button {
             id: loginBtn
-            text: "Login"
+            text: "登录"
             Layout.fillWidth: true
             highlighted: true
             enabled: sessionCtrl.isConnected

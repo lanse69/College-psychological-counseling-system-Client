@@ -25,7 +25,7 @@ NetworkClient::~NetworkClient() {
 void NetworkClient::connectToServer(const QString &ip, int port) {
     m_socket->abort(); // 取消之前的连接
     m_socket->connectToHost(ip, port);
-    qDebug() << "Connecting to" << ip << ":" << port;
+    qDebug() << "连接到" << ip << ":" << port;
 }
 
 bool NetworkClient::isConnected() const {
@@ -34,7 +34,7 @@ bool NetworkClient::isConnected() const {
 
 void NetworkClient::sendRequest(const QJsonObject &data) {
     if (m_socket->state() != QAbstractSocket::ConnectedState) {
-        qWarning() << "Not connected to server!";
+        qWarning() << "未连接服务端!";
         return;
     }
 
@@ -66,7 +66,7 @@ void NetworkClient::onReadyRead() {
   
         // 如果包过大，认为是异常数据，断开连接并清空缓冲  
         if (packetSize > MAX_PACKET_SIZE) {  
-            qWarning() << "Packet size too large:" << packetSize << "Dropping connection.";  
+            qWarning() << "包大小过大:" << packetSize << " 删除连接.";
             m_socket->abort();  
             m_buffer.clear();  
             return;  
@@ -83,26 +83,40 @@ void NetworkClient::onReadyRead() {
   
         QJsonParseError parseError;  
         QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);  
-        if (parseError.error == QJsonParseError::NoError && doc.isObject()) {  
-            // qDebug() << "[Client] Recv:" << doc.object();  
+        if (parseError.error == QJsonParseError::NoError && doc.isObject()) {
             emit responseReceived(doc.object());  
         } else {  
-            qWarning() << "JSON Parse Error:" << parseError.errorString();  
+            qWarning() << "JSON 解析失败:" << parseError.errorString();
         }  
     }
 }
 
 void NetworkClient::onConnected() {
-    qDebug() << "Connected to Server successfully!";
+    qDebug() << "连接服务端成功!";
     emit connectionStatusChanged(true);
 }
 
 void NetworkClient::onDisconnected() {
-    qDebug() << "Disconnected from Server.";
+    qDebug() << "从服务端断开连接.";
     emit connectionStatusChanged(false);
 }
 
 void NetworkClient::onSocketError(QAbstractSocket::SocketError socketError) {
-    qWarning() << "Socket Error:" << m_socket->errorString();
+    QString errorMsg;
+    switch (socketError) {
+    case QAbstractSocket::ConnectionRefusedError:
+        errorMsg = "连接被拒绝，请检查服务端是否启动或IP端口是否正确。";
+        break;
+    case QAbstractSocket::RemoteHostClosedError:
+        errorMsg = "服务端关闭了连接。";
+        break;
+    case QAbstractSocket::HostNotFoundError:
+        errorMsg = "找不到主机地址。";
+        break;
+    default:
+        errorMsg = QString("网络错误: %1").arg(m_socket->errorString());
+        break;
+    }
+    qWarning() << errorMsg;
     emit connectionStatusChanged(false);
 }

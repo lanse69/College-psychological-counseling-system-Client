@@ -16,7 +16,7 @@ SessionController::SessionController(QObject *parent) : QObject(parent), m_role{
 
 void SessionController::connectHost(const QString &ip, const int port) {
     if (NetworkClient::instance().isConnected()) {
-        qDebug() << "Already connected, skipping connectHost.";
+        qDebug() << "已连接, 跳过连接主机.";
         return;
     }
     NetworkClient::instance().connectToServer(ip, port);
@@ -41,7 +41,7 @@ void SessionController::login(const QString &username, const QString &password) 
     }
     
     if (username.isEmpty() || password.isEmpty()) {
-        emit loginFailed("Username or password cannot be empty");
+        emit loginFailed("用户名或密码不能为空");
         return;
     }
 
@@ -59,7 +59,7 @@ void SessionController::login(const QString &username, const QString &password) 
     if (NetworkClient::instance().isConnected()) {
         NetworkClient::instance().sendRequest(req);
     } else {
-        emit loginFailed("Server not connected. Check IP/Port.");
+        emit loginFailed("服务端未连接. 检查IP或端口.");
     }
 }
 
