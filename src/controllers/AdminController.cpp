@@ -89,7 +89,7 @@ void AdminController::onResponseReceived(const QJsonObject &root) {
         cmd == (int)CmdType::ADMIN_DEL_USER ||
         cmd == (int)CmdType::UPDATE_USER_INFO)
     {
-        bool success = (code == 200);
+        bool success = (code == (int)StatusCode::SUCCESS);
         emit operationResult(success, msg);
     }
 

@@ -69,7 +69,7 @@ void SessionController::onResponseReceived(const QJsonObject &root) {
     // 处理登录相关的回包
     if (cmd == (int)CmdType::LOGIN) {
         int code = root[JsonKeys::CODE].toInt();
-        if (code == 200) {
+        if (code == (int)StatusCode::SUCCESS) {
             QJsonObject data = root[JsonKeys::DATA].toObject();
             m_username = data[JsonKeys::USERNAME].toString();
             m_role = data[JsonKeys::ROLE].toInt();
@@ -88,7 +88,7 @@ void SessionController::onResponseReceived(const QJsonObject &root) {
         emit notificationReceived(msg); 
 
         // 特殊的协商请求 (Code 201)
-        if (code == 201) {
+        if (code == (int)StatusCode::NEGOTIATION_REQUIRED) {
             QJsonObject requestData = root[JsonKeys::DATA].toObject();
             emit bookingChangeRequested(requestData); // QML 监听此信号弹出“同意/拒绝”对话框
         }
