@@ -49,7 +49,10 @@ void NetworkClient::sendRequest(const QJsonObject &data) {
     out << (quint32)jsonData.size();
     packet.append(jsonData);
 
-    m_socket->write(packet);
+    qint64 bytesWritten = m_socket->write(packet);
+    if (bytesWritten == -1) {
+        qWarning() << "发送数据失败:" << m_socket->errorString();
+    }
     m_socket->flush();
 }
 

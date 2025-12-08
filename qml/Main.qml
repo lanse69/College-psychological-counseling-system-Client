@@ -13,16 +13,13 @@ ApplicationWindow {
         id: sessionCtrl
 
         onLoginSuccess: function(role) {
-            console.log("登录成功, 角色:", role)
             // 根据角色推入不同的界面
             if (role === 3) { // Admin
                 stackView.push("views/admin/AdminDash.qml")
             } else if (role === 2) { // Doctor
-                // stackView.push("views/doctor/DoctorDash.qml")
-                showToast("医生界面开发中...", false)
+                stackView.push("views/doctor/DoctorDash.qml")
             } else { // Student
-                // stackView.push("views/student/StudentDash.qml")
-                showToast("学生界面开发中...", false)
+                stackView.push("views/student/StudentDash.qml")
             }
         }
 
@@ -32,7 +29,6 @@ ApplicationWindow {
 
         // 监听被踢信号
         onSessionKicked: function(reason) {
-            console.log("账号被踢出:", reason)
             showToast(reason, true)
             // 回到初始页 (LoginView)
             stackView.pop(null)

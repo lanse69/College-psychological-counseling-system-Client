@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     app.setApplicationName("高校心理咨询系统");
-    app.setOrganizationName("高校");
+    app.setOrganizationName("心理");
 
     QQmlApplicationEngine engine;
     

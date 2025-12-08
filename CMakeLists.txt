@@ -10,7 +10,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-qt_standard_project_setup(REQUIRES 6.8)
+qt_standard_project_setup(REQUIRES 6.9)
 
 qt_add_executable(appPsyClient)
 
@@ -20,13 +20,14 @@ qt_add_qml_module(appPsyClient
     SOURCES
         src/main.cpp
         src/config/ProtocolDefs.h
+        src/controllers/BaseController.h src/controllers/BaseController.cpp
         src/controllers/AdminController.h src/controllers/AdminController.cpp
-        # src/controllers/DoctorController.h src/controllers/DoctorController.cpp
+        src/controllers/DoctorController.h src/controllers/DoctorController.cpp
         src/controllers/SessionController.h src/controllers/SessionController.cpp
-        # src/controllers/StudentController.h src/controllers/StudentController.cpp
-        # src/models/BookingModel.h src/models/BookingModel.cpp
-        # src/models/ChatModel.h src/models/ChatModel.cpp
-        # src/models/DoctorListModel.h src/models/DoctorListModel.cpp
+        src/controllers/StudentController.h src/controllers/StudentController.cpp
+        src/models/BookingModel.h src/models/BookingModel.cpp
+        src/models/ChatModel.h src/models/ChatModel.cpp
+        src/models/DoctorListModel.h src/models/DoctorListModel.cpp
         src/network/NetworkClient.h src/network/NetworkClient.cpp
         src/network/PacketDispatcher.h src/network/PacketDispatcher.cpp
     QML_FILES
@@ -34,6 +35,7 @@ qt_add_qml_module(appPsyClient
         qml/components/CCalendar.qml
         qml/components/CChart.qml
         qml/components/CToast.qml
+        qml/components/PatientList.qml
         qml/globals/Theme.qml
         qml/views/LoginView.qml
         qml/views/admin/AdminDash.qml

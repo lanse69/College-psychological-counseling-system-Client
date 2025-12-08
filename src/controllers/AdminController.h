@@ -15,7 +15,6 @@ public:
     /**
      * @brief 添加用户
      * @param role 1=Student, 2=Doctor
-     * QML ComboBox 索引通常从0开始
      */
     Q_INVOKABLE void addUser(const QString &username, const QString &password,
                              int role, const QString &realName,

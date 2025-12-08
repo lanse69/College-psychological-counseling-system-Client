@@ -23,7 +23,13 @@ Rectangle {
 
     function show(message, colorCode) {
         root.text = message
-        root.color = colorCode === "red" ? "#dd3333" : (colorCode === "green" ? "#33aa33" : "#333333")
+        if (colorCode === "red") {
+            root.color = "#dd3333"
+        } else if (colorCode === "green") {
+            root.color = "#33aa33"
+        } else {
+            root.color = "#333333"
+        }
         anim.restart()
     }
 

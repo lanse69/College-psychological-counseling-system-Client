@@ -4,13 +4,13 @@
 #include <QJsonObject>
 #include <QMap>
 
-class PacketDispatcher : public QObject {
+class PacketDispatcher : public QObject
+{
     Q_OBJECT
 public:
     static PacketDispatcher& instance();
 
 signals:
-    // 定义各类业务信号
     void onAuthResponse(const QJsonObject& data);
     void onAdminResponse(const QJsonObject& data);
     void onBookingResponse(const QJsonObject& data);
@@ -24,5 +24,5 @@ private slots:
     void dispatch(const QJsonObject& data);
 
 private:
-    explicit PacketDispatcher(QObject *parent = nullptr);
+    explicit PacketDispatcher(QObject* parent = nullptr);
 };

@@ -71,7 +71,7 @@ Page {
 
                 ScrollView {
                     anchors.fill: parent
-                    contentWidth: parent.width // 确保不产生水平滚动条
+                    contentWidth: parent.width
 
                     ColumnLayout {
                         width: Math.min(parent.width * 0.7, 800)
@@ -144,7 +144,7 @@ Page {
                             }
                         }
 
-                        // 医生专用区域
+                        // 医生
                         ColumnLayout {
                             visible: roleCombo.currentIndex === 1
                             Layout.fillWidth: true
@@ -265,7 +265,7 @@ Page {
                                                 font.bold: true
                                             }
                                             Text {
-                                                text: model.username + (model.role===1 ? " (学生)" : " (医生)")
+                                                text: model.username + (model.role === 1 ? " (学生)" : " (医生)")
                                                 color: "#aaa"
                                                 font.pixelSize: 12
                                             }
@@ -273,7 +273,15 @@ Page {
                                     }
 
                                     background: Rectangle {
-                                        color: parent.highlighted ? "#444" : (parent.hovered ? "#3a3a3a" : "transparent")
+                                        color: {
+                                            if (parent.highlighted) {
+                                                return "#444"
+                                            } else if (parent.hovered) {
+                                                return "#3a3a3a"
+                                            } else {
+                                                return "transparent"
+                                            }
+                                        }
                                     }
 
                                     highlighted: ListView.isCurrentItem

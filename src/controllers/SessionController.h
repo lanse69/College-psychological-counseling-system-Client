@@ -25,7 +25,7 @@ public:
 
 signals:
     void userInfoChanged();
-    void loginSuccess(int role); // 登录成功信号，带上角色以便跳转
+    void loginSuccess(int role); // 登录成功信号
     void loginFailed(const QString &message); // 登录失败信号
     void notificationReceived(const QString &msg);
     void bookingChangeRequested(const QJsonObject &details);
