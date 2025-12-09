@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QDataStream>
+#include <QTimer> 
 
 class NetworkClient : public QObject {
     Q_OBJECT
@@ -25,6 +26,7 @@ private slots:
     void onSocketError(QAbstractSocket::SocketError socketError);
     void onConnected();
     void onDisconnected();
+    void onHeartbeatTimer();
 
 private:
     explicit NetworkClient(QObject *parent = nullptr);
@@ -34,4 +36,5 @@ private:
 
     QTcpSocket *m_socket;
     QByteArray m_buffer;
+    QTimer *m_heartbeatTimer;
 };

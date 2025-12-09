@@ -12,6 +12,11 @@ NetworkClient& NetworkClient::instance() {
 NetworkClient::NetworkClient(QObject *parent) : QObject(parent) {
     m_socket = new QTcpSocket(this);
 
+    // 初始化心跳定时器
+    m_heartbeatTimer = new QTimer(this);
+    m_heartbeatTimer->setInterval(30000); // 30秒一次
+    connect(m_heartbeatTimer, &QTimer::timeout, this, &NetworkClient::onHeartbeatTimer);
+
     connect(m_socket, &QTcpSocket::readyRead, this, &NetworkClient::onReadyRead);
     connect(m_socket, &QTcpSocket::connected, this, &NetworkClient::onConnected);
     connect(m_socket, &QTcpSocket::disconnected, this, &NetworkClient::onDisconnected);
@@ -96,15 +101,23 @@ void NetworkClient::onReadyRead() {
 
 void NetworkClient::onConnected() {
     qDebug() << "连接服务端成功!";
+
+    m_heartbeatTimer->start();
+
     emit connectionStatusChanged(true);
 }
 
 void NetworkClient::onDisconnected() {
     qDebug() << "从服务端断开连接.";
+
+    m_heartbeatTimer->stop();
+
     emit connectionStatusChanged(false);
 }
 
 void NetworkClient::onSocketError(QAbstractSocket::SocketError socketError) {
+    m_heartbeatTimer->stop();
+    
     QString errorMsg;
     switch (socketError) {
     case QAbstractSocket::ConnectionRefusedError:
@@ -122,4 +135,14 @@ void NetworkClient::onSocketError(QAbstractSocket::SocketError socketError) {
     }
     qWarning() << errorMsg;
     emit connectionStatusChanged(false);
+}
+
+void NetworkClient::onHeartbeatTimer() {
+    if (isConnected()) {
+        QJsonObject heartbeat;
+        heartbeat[JsonKeys::CMD] = (int)CmdType::HEARTBEAT;
+        sendRequest(heartbeat);
+    } else {
+        m_heartbeatTimer->stop();
+    }
 }

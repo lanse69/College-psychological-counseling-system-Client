@@ -11,8 +11,7 @@ PacketDispatcher &PacketDispatcher::instance()
     return _inst;
 }
 
-PacketDispatcher::PacketDispatcher(
-    QObject *parent)
+PacketDispatcher::PacketDispatcher(QObject *parent)
     : QObject(parent)
 {
     connect(&NetworkClient::instance(),
@@ -21,8 +20,7 @@ PacketDispatcher::PacketDispatcher(
             &PacketDispatcher::dispatch);
 }
 
-void PacketDispatcher::dispatch(
-    const QJsonObject &data)
+void PacketDispatcher::dispatch(const QJsonObject &data)
 {
     if (!data.contains(JsonKeys::CMD)) {
         qWarning() << "收到无效数据包：缺少 CMD 字段";
@@ -45,7 +43,7 @@ void PacketDispatcher::dispatch(
         case CmdType::ADMIN_ADD_USER:
         case CmdType::ADMIN_DEL_USER:
         case CmdType::ADMIN_GET_USER_LIST:
-        case CmdType::UPDATE_USER_INFO: // 管理员修改用户信息
+        case CmdType::UPDATE_USER_INFO: 
         case CmdType::GET_STATISTICS:
             emit onAdminResponse(data);
         break;
@@ -57,19 +55,24 @@ void PacketDispatcher::dispatch(
         case CmdType::UPDATE_SCHEDULE:
         case CmdType::WRITE_REPORT:
         case CmdType::UPLOAD_SURVEY:
-        case CmdType::DOCTOR_GET_APPOINTMENTS: // 医生获取预约列表
-        case CmdType::DOCTOR_GET_PATIENTS:     // 医生获取患者列表
+        case CmdType::DOCTOR_GET_APPOINTMENTS: 
+        case CmdType::DOCTOR_GET_PATIENTS:    
+        // 医生操作相关指令
+        case CmdType::DOCTOR_CONFIRM_APPOINTMENT:   // 1201
+        case CmdType::DOCTOR_REJECT_APPOINTMENT:    // 1202
+        case CmdType::DOCTOR_COMPLETE_CONSULTATION: // 1203
+        case CmdType::DOCTOR_SUBMIT_REPORT:
+        case CmdType::DOCTOR_GET_PATIENT_HISTORY:
             emit onDoctorResponse(data);
         break;
 
-        // 预约业务
+        // 预约业务 (通用/查询类)
         case CmdType::CREATE_BOOKING:
         case CmdType::CANCEL_BOOKING:
         case CmdType::MODIFY_BOOKING_DIRECT:
         case CmdType::MODIFY_BOOKING_REQ:
         case CmdType::MODIFY_BOOKING_REPLY:
         case CmdType::GET_MY_BOOKINGS:
-        case CmdType::STUDENT_GET_MY_SCHEDULE: // 学生获取预约列表
             emit onBookingResponse(data);
         break;
 
@@ -78,6 +81,12 @@ void PacketDispatcher::dispatch(
         case CmdType::GET_SURVEY_CONTENT:
         case CmdType::SUBMIT_SURVEY:
         case CmdType::GET_REPORT:
+        case CmdType::STUDENT_GET_DOCTOR_LIST:
+        case CmdType::STUDENT_GET_MY_SCHEDULE:
+        case CmdType::STUDENT_CANCEL_APPOINTMENT:
+        case CmdType::STUDENT_SUBMIT_SURVEY:
+        // 学生预约指令
+        case CmdType::STUDENT_BOOK_APPOINTMENT:     // 1101
             emit onStudentResponse(data);
         break;
 
