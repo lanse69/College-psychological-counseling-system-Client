@@ -39,14 +39,18 @@ qt_add_qml_module(appPsyClient
         qml/globals/Theme.qml
         qml/views/LoginView.qml
         qml/views/admin/AdminDash.qml
-        qml/views/admin/StatsView.qml
-        qml/views/admin/UserEditor.qml
+        qml/views/admin/UserMgmtTab.qml
+        qml/views/admin/StatsTab.qml
         qml/views/doctor/DoctorDash.qml
-        qml/views/doctor/PatientView.qml
+        qml/views/doctor/AppointmentMgmtTab.qml
+        qml/views/doctor/StudentMgmtTab.qml
+        qml/views/doctor/ProfileTab.qml
         qml/views/doctor/ReportWrite.qml
         qml/views/doctor/ScheduleMgr.qml
+        qml/views/doctor/SurveyCreator.qml
         qml/views/student/DoctorDetail.qml
-        qml/views/student/MySchedule.qml
+        qml/views/student/DoctorListTab.qml
+        qml/views/student/MyScheduleTab.qml
         qml/views/student/StudentDash.qml
         qml/views/student/SurveyFill.qml
     RESOURCES resources.qrc

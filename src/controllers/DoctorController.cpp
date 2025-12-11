@@ -4,15 +4,41 @@
 #include <QTimer>
 
 #include "network/NetworkClient.h"
+#include "network/PacketDispatcher.h"
 #include "config/ProtocolDefs.h"
 
 DoctorController::DoctorController(QObject *parent) : BaseController(parent), m_bookingModel(new BookingModel(this))
 {
-    // 监听网络回包
-    connect(&NetworkClient::instance(),
-            &NetworkClient::responseReceived,
-            this,
-            &DoctorController::onResponseReceived);
+    connect(&PacketDispatcher::instance(), &PacketDispatcher::onDoctorResponse,
+            this, &DoctorController::onResponseReceived);
+}
+
+QJsonObject DoctorController::myProfile() const { 
+    return m_myProfile; 
+}
+
+// 更新个人信息
+void DoctorController::updateMyProfile(const QString &realName, const QString &password, 
+                                       const QString &intro, const QString &spec) 
+{
+    int myId = m_myProfile["id"].toInt();
+    if (myId == 0) {
+        emit operationResult(false, "未获取到用户信息，请先刷新");
+        return;
+    }
+
+    QJsonObject data;
+    data[JsonKeys::TARGET_ID] = myId;
+    data[JsonKeys::REAL_NAME] = realName;
+    data[JsonKeys::PASSWORD] = password;
+    data[JsonKeys::INTRO] = intro;
+    data[JsonKeys::SPEC] = spec;
+    
+    sendRequest(CmdType::UPDATE_USER_INFO, data);
+}
+
+void DoctorController::fetchMyProfile() {
+    sendRequest(CmdType::GET_USER_INFO);
 }
 
 void DoctorController::fetchAppointments()
@@ -48,8 +74,7 @@ void DoctorController::rejectAppointment(int appointmentId)
     sendRequest(CmdType::DOCTOR_REJECT_APPOINTMENT, data);
 }
 
-void DoctorController::completeConsultation(
-    int appointmentId)
+void DoctorController::completeConsultation(int appointmentId)
 {
     if (appointmentId <= 0) {
         emit operationResult(false, "预约ID无效");
@@ -71,20 +96,44 @@ void DoctorController::submitReport(const QJsonObject &reportData)
     sendRequest(CmdType::DOCTOR_SUBMIT_REPORT, reportData);
 }
 
+void DoctorController::deleteAppointment(int appointmentId)
+{
+    if (appointmentId <= 0) return;
+    QJsonObject data;
+    data[JsonKeys::APPOINTMENT_ID] = appointmentId;
+    sendRequest(CmdType::DOCTOR_DELETE_BOOKING, data);
+}
+
+void DoctorController::fetchAppointmentSurvey(int appointmentId)
+{
+    if (appointmentId <= 0) return;
+    QJsonObject data;
+    data[JsonKeys::APPOINTMENT_ID] = appointmentId;
+    sendRequest(CmdType::GET_SURVEY_CONTENT, data);
+}
+
 void DoctorController::onResponseReceived(const QJsonObject &root)
 {
     int cmd = root[JsonKeys::CMD].toInt();
     int code = root[JsonKeys::CODE].toInt();
     QString msg = root[JsonKeys::MSG].toString();
 
+    if (cmd == (int)CmdType::GET_USER_INFO) {
+        if (code == (int)StatusCode::SUCCESS) {
+            m_myProfile = root[JsonKeys::DATA].toObject();
+            emit myProfileChanged();
+        } else {
+            emit operationResult(false, msg);
+        }
+        return;
+    }
+
     switch (cmd) {
         case (int) CmdType::DOCTOR_GET_APPOINTMENTS:
             if (code == (int) StatusCode::SUCCESS) {
                 QJsonArray list = root[JsonKeys::DATA].toArray();
-                
                 QVector<BookingItem> items;
-                items.reserve(list.size()); // 预分配内存
-
+                
                 for (const QJsonValue &v : list) {
                     QJsonObject obj = v.toObject();
                     BookingItem item;
@@ -96,30 +145,78 @@ void DoctorController::onResponseReceived(const QJsonObject &root)
                     item.status = obj["status"].toInt();
                     item.reason = obj["reason"].toString();
                     
-                    // 预先计算显示文本
                     item.timeSlotText = getTimeSlotText(item.timeSlot);
                     item.statusText = getStatusText(item.status);
-
                     items.append(item);
                 }
-
-                // 更新模型
                 m_bookingModel->updateData(items);
-                // 默认应用"全部"筛选
-                m_bookingModel->applyFilter("全部");
-                
             } else {
                 emit operationResult(false, msg);
             }
             break;
 
+        case (int) CmdType::DOCTOR_GET_PATIENTS:
+             if (code == (int) StatusCode::SUCCESS) {
+                QJsonArray list = root[JsonKeys::DATA].toArray();
+                emit patientListReceived(list);
+            } else {
+                emit operationResult(false, msg);
+            }
+            break;
+
+        case (int) CmdType::GET_DOCTOR_SCHEDULE:
+            if (code == (int) StatusCode::SUCCESS) {
+                emit scheduleMaskReceived(root[JsonKeys::DATA].toObject());
+            }
+            break;
+
+        case (int) CmdType::DOCTOR_SUBMIT_REPORT:
+            emit operationResult(code == (int) StatusCode::SUCCESS, msg);
+            if (code == (int) StatusCode::SUCCESS) {
+                emit reportSubmitted(); 
+            }
+            break;
+
+        case (int) CmdType::UPDATE_USER_INFO:
+            emit operationResult(code == (int) StatusCode::SUCCESS, msg);
+            if (code == (int) StatusCode::SUCCESS) {
+                fetchMyProfile(); 
+            }
+            break;
+
         case (int) CmdType::DOCTOR_CONFIRM_APPOINTMENT:
         case (int) CmdType::DOCTOR_REJECT_APPOINTMENT:
+        case (int) CmdType::DOCTOR_COMPLETE_CONSULTATION:
+        case (int) CmdType::UPDATE_SCHEDULE: // 更新排班
             emit operationResult(code == (int) StatusCode::SUCCESS, msg);
             break;
 
-        case (int)CmdType::DOCTOR_GET_PATIENT_HISTORY:
+        case (int) CmdType::DOCTOR_GET_MY_SURVEY:
+            if (code == (int) StatusCode::SUCCESS) {
+                emit mySurveyReceived(root[JsonKeys::DATA].toObject());
+            }
+            break;
+        case (int) CmdType::DOCTOR_SAVE_SURVEY:
+            emit operationResult(code == (int)StatusCode::SUCCESS, msg);
+            break;
+
+        case (int) CmdType::DOCTOR_DELETE_BOOKING:
+            emit operationResult(code == (int)StatusCode::SUCCESS, msg);
             if (code == (int)StatusCode::SUCCESS) {
+                fetchAppointments(); // 删除成功后刷新列表
+            }
+            break;
+
+        case (int) CmdType::GET_SURVEY_CONTENT:
+            if (code == (int) StatusCode::SUCCESS) {
+                emit surveyContentReceived(root[JsonKeys::DATA].toObject());
+            } else {
+                emit operationResult(false, msg);
+            }
+            break;
+
+        case (int) CmdType::DOCTOR_GET_PATIENT_HISTORY:
+            if (code == (int) StatusCode::SUCCESS) {
                 QJsonArray list = root[JsonKeys::DATA].toArray();
                 emit patientHistoryReceived(list);
             } else {
@@ -127,45 +224,7 @@ void DoctorController::onResponseReceived(const QJsonObject &root)
             }
             break;
 
-        case (int)CmdType::GET_DOCTOR_SCHEDULE:
-            if (code == (int)StatusCode::SUCCESS) {
-                QJsonObject map = root[JsonKeys::DATA].toObject();
-                emit scheduleMaskReceived(map);
-            } else {
-                emit operationResult(false, msg);
-            }
-            break;
-
-        case (int)CmdType::UPDATE_SCHEDULE:
-            emit operationResult(code == (int)StatusCode::SUCCESS, msg);
-            break;
-
-        case (int) CmdType::DOCTOR_COMPLETE_CONSULTATION:
-            if (code == (int) StatusCode::SUCCESS) {
-                emit operationResult(true, msg);
-                // 完成咨询成功后刷新预约列表
-                QTimer::singleShot(500, this, &DoctorController::fetchAppointments);
-            } else {
-                emit operationResult(false, msg);
-            }
-            break;
-
-        case (int) CmdType::DOCTOR_SUBMIT_REPORT:
-            if (code == (int) StatusCode::SUCCESS) {
-                emit operationResult(true, msg);
-                emit reportSubmitted(); // 发出报告提交成功信号
-            } else {
-                emit operationResult(false, msg);
-            }
-            break;
-
-        case (int) CmdType::DOCTOR_GET_PATIENTS:
-            if (code == (int) StatusCode::SUCCESS) {
-                QJsonArray list = root[JsonKeys::DATA].toArray();
-                emit patientListReceived(list);
-            } else {
-                emit operationResult(false, msg);
-            }
+        case (int) CmdType::PUSH_NOTIFICATION:
             break;
 
         default:
@@ -220,4 +279,16 @@ void DoctorController::fetchPatientHistory(int studentId)
     QJsonObject data;
     data["studentId"] = studentId;
     sendRequest(CmdType::DOCTOR_GET_PATIENT_HISTORY, data);
+}
+
+void DoctorController::fetchMySurvey() {
+    sendRequest(CmdType::DOCTOR_GET_MY_SURVEY);
+}
+
+void DoctorController::saveMySurvey(const QString &title, const QVariantList &questions) {
+    QJsonObject data;
+    data["title"] = title;
+    data["questions"] = QJsonArray::fromVariantList(questions);
+    
+    sendRequest(CmdType::DOCTOR_SAVE_SURVEY, data);
 }

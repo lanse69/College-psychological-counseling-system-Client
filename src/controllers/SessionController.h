@@ -4,7 +4,9 @@
 #include <QQmlEngine>
 #include <QJsonObject>
 
-class SessionController : public QObject {
+#include "BaseController.h"
+
+class SessionController : public BaseController {
     Q_OBJECT
     QML_ELEMENT
 

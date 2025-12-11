@@ -1,6 +1,6 @@
 #include "BookingModel.h"
 
-BookingModel::BookingModel(QObject *parent) : QAbstractListModel(parent)
+BookingModel::BookingModel(QObject *parent) : QAbstractListModel(parent), m_currentFilter{"全部"}
 {}
 
 int BookingModel::rowCount(const QModelIndex &parent) const
@@ -47,25 +47,19 @@ QHash<int, QByteArray> BookingModel::roleNames() const
 
 void BookingModel::updateData(const QVector<BookingItem> &newItems)
 {
-    beginResetModel(); // 通知视图即将重置，暂停刷新
     m_allItems = newItems;
-    m_displayItems = newItems; // 默认显示所有（或保持当前筛选状态）
-    endResetModel();   // 通知视图数据已更新，一次性重绘
+    
+    applyFilter(m_currentFilter);
 }
 
 void BookingModel::applyFilter(const QString &statusFilter)
 {
+    m_currentFilter = statusFilter;
     beginResetModel();
+    m_displayItems.clear();
     if (statusFilter == "全部" || statusFilter.isEmpty()) {
-        // "全部" 显示待确认(0)和已确认(1)，隐藏已完成(2)和已取消(3)
-        m_displayItems.clear();
-        for (const auto &item : m_allItems) {
-            if (item.status == 0 || item.status == 1) {
-                m_displayItems.append(item);
-            }
-        }
+        m_displayItems = m_allItems; 
     } else {
-        m_displayItems.clear();
         int targetStatus = -1;
         if (statusFilter == "待确认") targetStatus = 0;
         else if (statusFilter == "已确认") targetStatus = 1;

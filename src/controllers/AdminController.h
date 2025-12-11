@@ -5,7 +5,9 @@
 #include <QJsonArray>
 #include <QQmlEngine>
 
-class AdminController : public QObject {
+#include "BaseController.h"
+
+class AdminController : public BaseController {
     Q_OBJECT
     QML_ELEMENT
 
@@ -32,11 +34,19 @@ public:
     Q_INVOKABLE void updateUserInfo(int targetId, const QString &realName, const QString &password,
                                     const QString &intro, const QString &spec);
 
+    /**
+     * @brief 获取用户列表
+     */
     Q_INVOKABLE void fetchUserList();
 
+    /**
+     * @brief 获取统计数据
+     */
+    Q_INVOKABLE void fetchStatistics(const QString &type);
+
 signals:
-    void operationResult(bool success, const QString &msg);
     void userListReceived(const QJsonArray &users);
+    void statisticsReceived(const QJsonArray &data);
 
 private slots:
     void onResponseReceived(const QJsonObject &data);

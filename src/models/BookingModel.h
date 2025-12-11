@@ -46,4 +46,5 @@ public:
 private:
     QVector<BookingItem> m_allItems;    // 存储所有数据
     QVector<BookingItem> m_displayItems; // 存储当前显示的数据(经过筛选)
+    QString m_currentFilter;
 };

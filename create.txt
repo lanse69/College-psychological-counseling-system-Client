@@ -5,48 +5,52 @@
 1. 客户端目录结构
 
 PsyClient/
-├── CMakeLists.txt                  # 构建脚本
-├── resources.qrc                   # 资源文件（QML, 图片, 图标）
+├── CMakeLists.txt                     # 构建脚本
+├── resources.qrc                      # 资源文件（QML, 图片, 图标）
 ├── src/
-│   ├── main.cpp                    # 程序入口：启动主窗口
+│   ├── main.cpp                       # 程序入口：启动主窗口
 │   ├── config/
-│   │   └── ProtocolDefs.h          # 协议定义
+│   │   └── ProtocolDefs.h             # 协议定义
 │   ├── network/
-│   │   ├── NetworkClient.h/cpp     # 单例：管理 QTcpSocket，处理断线重连，发送 JSON
-│   │   └── PacketDispatcher.h/cpp  # 接收服务端 JSON，根据 `type` 信号分发给不同的 Controller
-│   ├── controllers/                # 供 QML 调用的 C++ 逻辑控制类 (Q_INVOKABLE)
-│   │   ├── SessionController.h/cpp # 管理当前登录用户、SessionToken、页面跳转路由
-│   │   ├── StudentController.h/cpp # 学生操作：查医生、发起预约、提交问卷
-│   │   ├── DoctorController.h/cpp  # 医生操作：排班管理、处理修改请求、写报告
-│   │   └── AdminController.h/cpp   # 管理员操作：用户管理、获取报表数据
-│   └── models/                     # QAbstractListModel 实现类（用于 QML ListView 数据绑定）
-│       ├── DoctorListModel.h/cpp   # 医生列表数据源
-│       ├── BookingModel.h/cpp      # 预约记录列表数据源
-│       └── ChatModel.h/cpp         # 咨询记录列表
+│   │   ├── NetworkClient.h/cpp        # 单例：管理 QTcpSocket，处理断线重连，发送 JSON
+│   │   └── PacketDispatcher.h/cpp     # 接收服务端 JSON，根据 `type` 信号分发给不同的 Controller
+│   ├── controllers/                   # 供 QML 调用的 C++ 逻辑控制类 (Q_INVOKABLE)
+│   │   ├── SessionController.h/cpp    # 管理当前登录用户、SessionToken、页面跳转路由
+│   │   ├── StudentController.h/cpp    # 学生操作：查医生、发起预约、提交问卷
+│   │   ├── DoctorController.h/cpp     # 医生操作：排班管理、处理修改请求、写报告
+│   │   └── AdminController.h/cpp      # 管理员操作：用户管理、获取报表数据
+│   └── models/                        # QAbstractListModel 实现类（用于 QML ListView 数据绑定）
+│       ├── DoctorListModel.h/cpp      # 医生列表数据源
+│       ├── BookingModel.h/cpp         # 预约记录列表数据源
+│       └── ChatModel.h/cpp            # 咨询记录列表
 ├── qml/
-│   ├── Main.qml                    # 根窗口 (StackView)
+│   ├── Main.qml                       # 根窗口 (StackView)
 │   ├── globals/
-│   │   └── Theme.qml               # 全局样式（颜色、字体）
-│   ├── components/                 # 通用 UI 组件
-│   │   ├── CCalendar.qml           # 自定义日历控件（用于展示排班）
-│   │   ├── CChart.qml              # 图表控件（使用 Canvas 绘制统计图）
-│   │   └── CToast.qml              # 消息提示弹窗
-│   └── views/                      # 具体业务页面
-│       ├── LoginView.qml           # 登录/注册页
+│   │   └── Theme.qml                  # 全局样式（颜色、字体）
+│   ├── components/                    # 通用 UI 组件
+│   │   ├── CCalendar.qml              # 自定义日历控件（用于展示排班）
+│   │   ├── CChart.qml                 # 图表控件（使用 Canvas 绘制统计图）
+│   │   └── CToast.qml                 # 消息提示弹窗
+│   └── views/                         # 具体业务页面
+│       ├── LoginView.qml              # 登录/注册页
 │       ├── student/
-│       │   ├── StudentDash.qml     # 学生主控台
-│       │   ├── DoctorDetail.qml    # 医生详情与预约
-│       │   ├── MySchedule.qml      # 我的预约（含修改/取消逻辑）
-│       │   └── SurveyFill.qml      # 填写问卷页
+│       │   ├── StudentDash.qml        # 学生主控台
+│       │   ├── DoctorListTab.qml      # 显示医生列表
+│       │   ├── MyScheduleTab.qml      # 显示预约记录
+│       │   ├── DoctorDetail.qml       # 医生详情与预约
+│       │   └── SurveyFill.qml         # 填写问卷页
 │       ├── doctor/
-│       │   ├── DoctorDash.qml      # 医生主控台
-│       │   ├── ScheduleMgr.qml     # 排班管理页（可点选时间段）
-│       │   ├── PatientView.qml     # 查看学生资料及问卷
-│       │   └── ReportWrite.qml     # 填写咨询报告
+│       │   ├── DoctorDash.qml         # 医生主控台
+│       │   ├── AppointmentMgmtTab.qml # 预约处理
+│       │   ├── StudentMgmtTab.qml     # 学生档案查看、历史记录
+│       │   ├── ProfileTab.qml         # 个人信息修改、排班入口、问卷入口
+│       │   ├── ScheduleMgr.qml        # 排班管理页（可点选时间段）
+│       │   └── ReportWrite.qml        # 填写咨询报告
+│       │   ├── SurveyCreator.qml      # 问卷管理
 │       └── admin/
-│           ├── AdminDash.qml       # 管理员主控台
-│           ├── UserEditor.qml      # 增删改查用户
-│           └── StatsView.qml       # 数据报表展示页
+│           ├── AdminDash.qml          # 管理员主控台
+│           ├── UserMgmtTab.qml        # 增删改查用户
+│           └── StatsTab.qml           # 数据报表展示页
 
 2. 关键文件功能详解
 

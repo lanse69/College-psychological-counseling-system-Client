@@ -11,13 +11,10 @@ PacketDispatcher &PacketDispatcher::instance()
     return _inst;
 }
 
-PacketDispatcher::PacketDispatcher(QObject *parent)
-    : QObject(parent)
+PacketDispatcher::PacketDispatcher(QObject *parent) : QObject(parent)
 {
-    connect(&NetworkClient::instance(),
-            &NetworkClient::responseReceived,
-            this,
-            &PacketDispatcher::dispatch);
+    connect(&NetworkClient::instance(), &NetworkClient::responseReceived,
+            this, &PacketDispatcher::dispatch);
 }
 
 void PacketDispatcher::dispatch(const QJsonObject &data)
@@ -30,6 +27,12 @@ void PacketDispatcher::dispatch(const QJsonObject &data)
     int cmdVal = data[JsonKeys::CMD].toInt();
     CmdType cmd = static_cast<CmdType>(cmdVal);
 
+    if (cmd == CmdType::GET_SURVEY_CONTENT) {
+        emit onStudentResponse(data);
+        emit onDoctorResponse(data);
+        return;
+    }
+
     switch (cmd) {
         // 认证与基础
         case CmdType::LOGIN:
@@ -37,71 +40,57 @@ void PacketDispatcher::dispatch(const QJsonObject &data)
         case CmdType::UPDATE_PWD:
         case CmdType::GET_USER_INFO:
             emit onAuthResponse(data);
-        break;
+            break;
 
         // 管理员业务
         case CmdType::ADMIN_ADD_USER:
         case CmdType::ADMIN_DEL_USER:
         case CmdType::ADMIN_GET_USER_LIST:
-        case CmdType::UPDATE_USER_INFO: 
+        case CmdType::UPDATE_USER_INFO:
         case CmdType::GET_STATISTICS:
             emit onAdminResponse(data);
-        break;
+            break;
 
-        // 医生/排班业务
+        // 医生业务
         case CmdType::GET_DOCTOR_LIST:
         case CmdType::GET_DOCTOR_DETAIL:
         case CmdType::GET_DOCTOR_SCHEDULE:
         case CmdType::UPDATE_SCHEDULE:
-        case CmdType::WRITE_REPORT:
-        case CmdType::UPLOAD_SURVEY:
-        case CmdType::DOCTOR_GET_APPOINTMENTS: 
-        case CmdType::DOCTOR_GET_PATIENTS:    
-        // 医生操作相关指令
-        case CmdType::DOCTOR_CONFIRM_APPOINTMENT:   // 1201
-        case CmdType::DOCTOR_REJECT_APPOINTMENT:    // 1202
-        case CmdType::DOCTOR_COMPLETE_CONSULTATION: // 1203
+        case CmdType::DOCTOR_GET_APPOINTMENTS:
+        case CmdType::DOCTOR_GET_PATIENTS:
+        case CmdType::DOCTOR_CONFIRM_APPOINTMENT:
+        case CmdType::DOCTOR_REJECT_APPOINTMENT:
+        case CmdType::DOCTOR_COMPLETE_CONSULTATION:
         case CmdType::DOCTOR_SUBMIT_REPORT:
         case CmdType::DOCTOR_GET_PATIENT_HISTORY:
+        case CmdType::DOCTOR_GET_MY_SURVEY:
+        case CmdType::DOCTOR_SAVE_SURVEY:
             emit onDoctorResponse(data);
-        break;
+            break;
 
-        // 预约业务 (通用/查询类)
+        // 学生业务 & 预约通用
         case CmdType::CREATE_BOOKING:
         case CmdType::CANCEL_BOOKING:
-        case CmdType::MODIFY_BOOKING_DIRECT:
-        case CmdType::MODIFY_BOOKING_REQ:
-        case CmdType::MODIFY_BOOKING_REPLY:
         case CmdType::GET_MY_BOOKINGS:
-            emit onBookingResponse(data);
-        break;
-
-        // 学生/问卷业务
-        case CmdType::GET_SURVEY_LIST:
-        case CmdType::GET_SURVEY_CONTENT:
-        case CmdType::SUBMIT_SURVEY:
-        case CmdType::GET_REPORT:
         case CmdType::STUDENT_GET_DOCTOR_LIST:
+        case CmdType::STUDENT_BOOK_APPOINTMENT:
         case CmdType::STUDENT_GET_MY_SCHEDULE:
         case CmdType::STUDENT_CANCEL_APPOINTMENT:
+        case CmdType::STUDENT_DELETE_BOOKING:
         case CmdType::STUDENT_SUBMIT_SURVEY:
-        // 学生预约指令
-        case CmdType::STUDENT_BOOK_APPOINTMENT:     // 1101
             emit onStudentResponse(data);
-        break;
+            break;
 
-        // 系统推送
+        // 推送通知
         case CmdType::PUSH_NOTIFICATION:
             emit onNotification(data);
-        break;
-
-        // 心跳
+            break;
+            
         case CmdType::HEARTBEAT:
-            break; // 静默处理
+            break;
 
-        // 其他
         default:
-            qWarning() << "未处理的指令类型:" << cmdVal;
-        break;
+            qWarning() << "PacketDispatcher: 未分类的指令" << cmdVal;
+            break;
     }
 }

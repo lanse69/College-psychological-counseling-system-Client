@@ -4,15 +4,13 @@
 #include <QDate>
 
 #include "network/NetworkClient.h"
+#include "network/PacketDispatcher.h"
 #include "config/ProtocolDefs.h"
 
 StudentController::StudentController(QObject *parent) : BaseController(parent)
 {
-    // 监听网络回包
-    connect(&NetworkClient::instance(),
-            &NetworkClient::responseReceived,
-            this,
-            &StudentController::onResponseReceived);
+    connect(&PacketDispatcher::instance(), &PacketDispatcher::onStudentResponse,
+            this, &StudentController::onResponseReceived);
 }
 
 void StudentController::fetchDoctorList()
@@ -107,6 +105,23 @@ void StudentController::submitSurvey(int appointmentId, const QStringList &answe
     sendRequest(CmdType::STUDENT_SUBMIT_SURVEY, data);
 }
 
+void StudentController::fetchSurveyContent(int appointmentId)
+{
+    if (appointmentId <= 0) return;
+    QJsonObject data;
+    data[JsonKeys::APPOINTMENT_ID] = appointmentId;
+    sendRequest(CmdType::GET_SURVEY_CONTENT, data);
+}
+
+void StudentController::deleteAppointment(int appointmentId)
+{
+    if (appointmentId <= 0) return;
+
+    QJsonObject data;
+    data[JsonKeys::APPOINTMENT_ID] = appointmentId;
+    sendRequest(CmdType::STUDENT_DELETE_BOOKING, data);
+}
+
 void StudentController::onResponseReceived(const QJsonObject &root)
 {
     int cmd = root[JsonKeys::CMD].toInt();
@@ -144,6 +159,7 @@ void StudentController::onResponseReceived(const QJsonObject &root)
         case (int) CmdType::STUDENT_BOOK_APPOINTMENT:
         case (int) CmdType::STUDENT_CANCEL_APPOINTMENT:
         case (int) CmdType::STUDENT_SUBMIT_SURVEY:
+        case (int) CmdType::STUDENT_DELETE_BOOKING: // 处理删除回包
             emit operationResult(code == (int) StatusCode::SUCCESS, msg);
             break;
 
@@ -155,6 +171,18 @@ void StudentController::onResponseReceived(const QJsonObject &root)
                 emit operationResult(false, msg);
             }
             break;
+
+        case (int) CmdType::GET_SURVEY_CONTENT:
+            if (code == (int) StatusCode::SUCCESS) {
+                QJsonObject survey = root[JsonKeys::DATA].toObject();
+                emit surveyContentReceived(survey);
+            } else {
+                emit operationResult(false, msg);
+            }
+            break;
+
+        case (int) CmdType::PUSH_NOTIFICATION: 
+            break; 
 
         default:
             qWarning() << "未处理的命令:" << cmd;

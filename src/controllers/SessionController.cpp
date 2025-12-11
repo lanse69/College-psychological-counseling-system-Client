@@ -7,15 +7,15 @@
 #include "network/PacketDispatcher.h"
 #include "config/ProtocolDefs.h"
 
-SessionController::SessionController(QObject *parent) : QObject(parent), m_role{0}, m_isConnected{false} {
-    // TODO 需改
+SessionController::SessionController(QObject *parent) : BaseController(parent), m_role{0}, m_isConnected{false} {
+    // 监听 Dispatcher
     connect(&PacketDispatcher::instance(), &PacketDispatcher::onAuthResponse,
             this, &SessionController::onResponseReceived);
-
+    
+    // 通知单独监听
     connect(&PacketDispatcher::instance(), &PacketDispatcher::onNotification,
             this, &SessionController::onResponseReceived);
 
-    // 连接底层网络状态变化的信号
     connect(&NetworkClient::instance(), &NetworkClient::connectionStatusChanged,
             this, &SessionController::onNetStatusChanged);
 }
@@ -54,22 +54,11 @@ void SessionController::login(const QString &username, const QString &password) 
     // 客户端先进行一次 Hash，避免明文传输
     QString passwordHash = QString(QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256).toHex());
 
-    // 构建请求 JSON
-    QJsonObject req;
-    req[JsonKeys::CMD] = (int)CmdType::LOGIN;
-    
     QJsonObject data;
     data[JsonKeys::USERNAME] = username;
     data[JsonKeys::PASSWORD] = passwordHash; // Hash
     
-    req[JsonKeys::DATA] = data;
-
-    // 发送请求
-    if (NetworkClient::instance().isConnected()) {
-        NetworkClient::instance().sendRequest(req);
-    } else {
-        emit loginFailed("服务端未连接. 检查IP或端口.");
-    }
+    sendRequest(CmdType::LOGIN, data);
 }
 
 void SessionController::onResponseReceived(const QJsonObject &root) {
@@ -93,19 +82,13 @@ void SessionController::onResponseReceived(const QJsonObject &root) {
         QString msg = root[JsonKeys::MSG].toString();
         int code = root[JsonKeys::CODE].toInt();
         
-        // 检测是否被踢 (CONFLICT = 409)
-        if (code == (int)StatusCode::CONFLICT) {
-            // 发射被踢信号
+        if (code == (int)StatusCode::CONFLICT) { // 被踢下线
             emit sessionKicked(msg);
-        } else {
-            // 普通通知
+        } else if (code == (int)StatusCode::NEGOTIATION_REQUIRED) { // 协商修改
+            QJsonObject requestData = root[JsonKeys::DATA].toObject();
+            emit bookingChangeRequested(requestData);
+        } else { // 普通通知
             emit notificationReceived(msg);
-
-            // 特殊的协商请求 (Code 201)
-            if (code == (int)StatusCode::NEGOTIATION_REQUIRED) {
-                QJsonObject requestData = root[JsonKeys::DATA].toObject();
-                emit bookingChangeRequested(requestData); // QML 监听此信号弹出“同意/拒绝”对话框
-            }
         }
     }
 }

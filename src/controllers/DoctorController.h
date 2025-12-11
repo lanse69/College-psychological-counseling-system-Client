@@ -13,11 +13,14 @@ class DoctorController : public BaseController
     QML_ELEMENT
 
     Q_PROPERTY(BookingModel* appointmentModel READ appointmentModel CONSTANT)
+    Q_PROPERTY(QJsonObject myProfile READ myProfile NOTIFY myProfileChanged)
 
 public:
     explicit DoctorController(QObject *parent = nullptr);
 
     BookingModel* appointmentModel() const;
+
+    QJsonObject myProfile() const;
 
     /**
      * @brief 获取预约列表
@@ -58,21 +61,41 @@ public:
      */
     Q_INVOKABLE void fetchPatientHistory(int studentId);
 
+    // 获取个人信息
+    Q_INVOKABLE void fetchMyProfile();
+
+    // 更新个人信息
+    Q_INVOKABLE void updateMyProfile(const QString &realName, const QString &password, const QString &intro, const QString &spec);
+
+    // 获取我当前的问卷
+    Q_INVOKABLE void fetchMySurvey();
+    
+    // 保存新问卷
+    Q_INVOKABLE void saveMySurvey(const QString &title, const QVariantList &questions);
+
+    Q_INVOKABLE void deleteAppointment(int appointmentId);
+
+    Q_INVOKABLE void fetchAppointmentSurvey(int appointmentId);
+
 signals:
     void patientListReceived(const QJsonArray &patients);
     void reportSubmitted();
     void scheduleMaskReceived(const QJsonObject &scheduleMap);
     /**
-     * @brief 收到患者历史记录信号
+     * @brief 收到预约学会历史记录信号
      * @param history 包含预约记录的 JSON 数组
      */
     void patientHistoryReceived(const QJsonArray &history);
+    void myProfileChanged();
+    void mySurveyReceived(const QJsonObject &surveyData);
+    void surveyContentReceived(const QJsonObject &data);
 
 private slots:
     void onResponseReceived(const QJsonObject &data);
 
 private:
     BookingModel* m_bookingModel;
+    QJsonObject m_myProfile;
     
     QString getTimeSlotText(int slot);
     QString getStatusText(int status);

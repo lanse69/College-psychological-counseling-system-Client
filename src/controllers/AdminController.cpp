@@ -3,18 +3,15 @@
 #include <QCryptographicHash>
 #include <QDebug>
 
-#include "network/NetworkClient.h"
+#include "network/PacketDispatcher.h"
 #include "config/ProtocolDefs.h"
 
-AdminController::AdminController(QObject *parent) : QObject(parent) {
-    // 监听网络回包
-    connect(&NetworkClient::instance(), &NetworkClient::responseReceived,
+AdminController::AdminController(QObject *parent) : BaseController(parent) {
+    connect(&PacketDispatcher::instance(), &PacketDispatcher::onAdminResponse,
             this, &AdminController::onResponseReceived);
 }
 
-void AdminController::addUser(const QString &username, const QString &password,
-                              int role, const QString &realName,
-                              const QString &intro, const QString &spec)
+void AdminController::addUser(const QString &username, const QString &password, int role, const QString &realName, const QString &intro, const QString &spec)
 {
     if (username.isEmpty() || password.isEmpty()) {
         emit operationResult(false, "用户名和密码不能为空");
@@ -23,9 +20,7 @@ void AdminController::addUser(const QString &username, const QString &password,
 
     QString passwordHash = QString(QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256).toHex());
 
-    QJsonObject req, data;
-    req[JsonKeys::CMD] = (int)CmdType::ADMIN_ADD_USER;
-
+    QJsonObject data;
     data[JsonKeys::USERNAME] = username;
     data[JsonKeys::PASSWORD] = passwordHash;
     data[JsonKeys::ROLE] = role;
@@ -37,8 +32,7 @@ void AdminController::addUser(const QString &username, const QString &password,
         data[JsonKeys::SPEC] = spec;
     }
 
-    req[JsonKeys::DATA] = data;
-    NetworkClient::instance().sendRequest(req);
+    sendRequest(CmdType::ADMIN_ADD_USER, data);
 }
 
 void AdminController::deleteUser(int targetId) {
@@ -47,24 +41,20 @@ void AdminController::deleteUser(int targetId) {
         return;
     }
 
-    QJsonObject req, data;
-    req[JsonKeys::CMD] = (int)CmdType::ADMIN_DEL_USER;
+    QJsonObject data;
     data[JsonKeys::TARGET_ID] = targetId;
-    req[JsonKeys::DATA] = data;
 
-    NetworkClient::instance().sendRequest(req);
+    sendRequest(CmdType::ADMIN_DEL_USER, data);
 }
 
-void AdminController::updateUserInfo(int targetId, const QString &realName, const QString &password,
-                                     const QString &intro, const QString &spec)
+void AdminController::updateUserInfo(int targetId, const QString &realName, const QString &password, const QString &intro, const QString &spec)
 {
     if (targetId <= 0) {
         emit operationResult(false, "无效的用户 ID");
         return;
     }
 
-    QJsonObject req, data;
-    req[JsonKeys::CMD] = (int)CmdType::UPDATE_USER_INFO;
+    QJsonObject data;
 
     data[JsonKeys::TARGET_ID] = targetId;
     data[JsonKeys::REAL_NAME] = realName;
@@ -78,14 +68,17 @@ void AdminController::updateUserInfo(int targetId, const QString &realName, cons
     data[JsonKeys::INTRO] = intro;
     data[JsonKeys::SPEC] = spec;
 
-    req[JsonKeys::DATA] = data;
-    NetworkClient::instance().sendRequest(req);
+    sendRequest(CmdType::UPDATE_USER_INFO, data);
 }
 
 void AdminController::fetchUserList() {
-    QJsonObject req;
-    req[JsonKeys::CMD] = (int)CmdType::ADMIN_GET_USER_LIST;
-    NetworkClient::instance().sendRequest(req);
+    sendRequest(CmdType::ADMIN_GET_USER_LIST);
+}
+
+void AdminController::fetchStatistics(const QString &type) {
+    QJsonObject data;
+    data["type"] = type;
+    sendRequest(CmdType::GET_STATISTICS, data);
 }
 
 void AdminController::onResponseReceived(const QJsonObject &root) {
@@ -102,7 +95,20 @@ void AdminController::onResponseReceived(const QJsonObject &root) {
     }
 
     if (cmd == (int)CmdType::ADMIN_GET_USER_LIST) {
-        QJsonArray list = root[JsonKeys::DATA].toArray();
-        emit userListReceived(list);
+        if (code == (int)StatusCode::SUCCESS) {
+            QJsonArray list = root[JsonKeys::DATA].toArray();
+            emit userListReceived(list);
+        } else {
+            emit operationResult(false, msg);
+        }
+    }
+
+    if (cmd == (int)CmdType::GET_STATISTICS) {
+        if (code == (int)StatusCode::SUCCESS) {
+            QJsonArray list = root[JsonKeys::DATA].toArray();
+            emit statisticsReceived(list);
+        } else {
+            emit operationResult(false, msg);
+        }
     }
 }
