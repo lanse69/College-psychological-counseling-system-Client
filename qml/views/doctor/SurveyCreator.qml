@@ -7,9 +7,19 @@ Page {
     id: root
     title: "问卷编辑器"
 
+    background: Rectangle { color: Theme.background }
+
     // 顶部工具栏
     header: ToolBar {
-        background: Rectangle { color: "#333" }
+        background: Rectangle { 
+            color: Theme.surface 
+            Rectangle {
+                width: parent.width
+                height: 1
+                anchors.bottom: parent.bottom
+                color: Theme.divider
+            }
+        }
 
         topPadding: 10 
         bottomPadding: 10
@@ -23,7 +33,7 @@ Page {
             
             contentItem: Text {
                 text: parent.text
-                color: "white"
+                color: Theme.textPrimary
                 font.pixelSize: 14
             }
             background: Rectangle { color: "transparent" }
@@ -31,9 +41,9 @@ Page {
 
         Label {
             text: "编辑我的问卷"
-            font.pixelSize: 20
+            font.pixelSize: 18
             font.bold: true
-            color: "white"
+            color: Theme.textPrimary
             anchors.centerIn: parent
         }
 
@@ -46,11 +56,11 @@ Page {
             
             contentItem: Text {
                 text: parent.text
-                color: "white"
+                color: Theme.textInverted
                 font.bold: true
             }
             background: Rectangle {
-                color: parent.down ? "#388e3c" : "#4CAF50"
+                color: parent.down ? Theme.primaryHover : Theme.primary
                 radius: 4
             }
             
@@ -81,7 +91,7 @@ Page {
                     for (var i = 0; i < qList.length; i++) {
                         var item = qList[i]
                         
-                        // 数据转换：将 options 数组 ["A", "B"] 转为字符串 "A\nB"
+                        // 将 options 数组 ["A", "B"] 转为字符串 "A\nB"
                         var optsStr = ""
                         if (Array.isArray(item.options)) {
                             optsStr = item.options.join("\n")
@@ -93,7 +103,7 @@ Page {
                         questionsModel.append({
                             "question": item.question,
                             "type": item.type || "single",
-                            "optionsStr": optsStr // 存为字符串供 TextArea 使用
+                            "optionsStr": optsStr
                         })
                     }
                 }
@@ -110,155 +120,180 @@ Page {
         doctorCtrl.fetchMySurvey()
     }
 
-    // 数据模型
     ListModel { id: questionsModel }
 
-    // 主体内容
-    Rectangle {
+    ColumnLayout {
         anchors.fill: parent
-        color: "#1e1e1e" // 背景色
+        anchors.margins: 20
+        spacing: 15
 
+        // 问卷标题输入
         ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: 20
-            spacing: 15
-
-            // 问卷标题输入
-            ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 5
+            
+            Label { 
+                text: "问卷标题" 
+                color: Theme.textSecondary 
+                font.pixelSize: 14 
+            }
+            
+            TextField {
+                id: surveyTitle
+                placeholderText: "例如: 抑郁自评量表 (SDS)"
                 Layout.fillWidth: true
-                spacing: 5
+                font.pixelSize: 16
                 
-                Label { text: "问卷标题"; color: "#ccc"; font.pixelSize: 14 }
+                color: Theme.textPrimary
+                placeholderTextColor: Theme.textPlaceholder
                 
-                TextField {
-                    id: surveyTitle
-                    placeholderText: "例如: 抑郁自评量表 (SDS)"
-                    Layout.fillWidth: true
-                    font.pixelSize: 16
-                    color: "black"
-                    background: Rectangle { color: "white"; radius: 4 }
+                background: Rectangle { 
+                    color: Theme.inputBackground 
+                    radius: 4 
+                    border.color: Theme.border
+                    border.width: parent.activeFocus ? 2 : 1
                 }
             }
+        }
 
-            Rectangle { height: 1; Layout.fillWidth: true; color: "#444" }
+        Rectangle { height: 1; Layout.fillWidth: true; color: Theme.divider }
 
-            // 问题列表
-            ScrollView {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                clip: true
+        // 问题列表
+        ScrollView {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            clip: true
 
-                ListView {
-                    id: qList
-                    model: questionsModel
-                    width: parent.width
-                    spacing: 20
+            ListView {
+                id: qList
+                model: questionsModel
+                width: parent.width
+                spacing: 20
+                bottomMargin: 20
 
-                    delegate: Rectangle {
-                        width: ListView.view.width - 20 // 留出滚动条空间
-                        height: col.implicitHeight + 30
-                        color: "#2b2b2b"
-                        radius: 8
-                        border.color: "#555"
-                        border.width: 1
-                        x: (ListView.view.width - width) / 2
+                delegate: Rectangle {
+                    width: ListView.view.width - 20 // 留出滚动条空间
+                    height: col.implicitHeight + 30
+                    
+                    color: Theme.surface
+                    radius: 8
+                    border.color: Theme.border
+                    border.width: 1
+                    
+                    x: 10
 
-                        ColumnLayout {
-                            id: col
-                            anchors.fill: parent
-                            anchors.margins: 15
-                            spacing: 10
+                    ColumnLayout {
+                        id: col
+                        anchors.fill: parent
+                        anchors.margins: 15
+                        spacing: 10
 
-                            // 题目头部
-                            RowLayout {
-                                Layout.fillWidth: true
-                                Label { 
-                                    text: "问题 " + (index + 1)
-                                    font.bold: true
-                                    color: "#4CAF50"
-                                    font.pixelSize: 16
-                                }
-                                Item { Layout.fillWidth: true }
-                                Button {
-                                    text: "删除"
-                                    flat: true
-                                    Layout.preferredHeight: 30
-                                    contentItem: Text { text: "删除"; color: "#ff5252"; font.pixelSize: 14 }
-                                    background: Rectangle { color: "transparent" }
-                                    onClicked: questionsModel.remove(index)
-                                }
-                            }
-
-                            // 题目输入框
-                            TextField {
-                                Layout.fillWidth: true
-                                placeholderText: "请输入题目内容..."
-                                text: model.question
-                                color: "black"
-                                background: Rectangle { color: "#f0f0f0"; radius: 4 }
-                                // 实时回写 Model
-                                onTextChanged: model.question = text 
-                            }
-
+                        // 题目头部
+                        RowLayout {
+                            Layout.fillWidth: true
                             Label { 
-                                text: "选项设置 (每行一个选项):" 
-                                color: "#aaa"
-                                font.pixelSize: 12
+                                text: "问题 " + (index + 1)
+                                font.bold: true
+                                color: Theme.primary
+                                font.pixelSize: 16
                             }
+                            Item { Layout.fillWidth: true }
+                            Button {
+                                text: "删除"
+                                flat: true
+                                Layout.preferredHeight: 30
+                                contentItem: Text { 
+                                    text: "删除"
+                                    color: Theme.error 
+                                    font.pixelSize: 14 
+                                }
+                                background: Rectangle { color: "transparent" }
+                                onClicked: questionsModel.remove(index)
+                            }
+                        }
 
-                            // 选项编辑框 (多行文本)
-                            TextArea {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: 100
-                                placeholderText: "选项1\n选项2\n选项3\n选项4"
-                                color: "black"
-                                background: Rectangle { color: "#f0f0f0"; radius: 4 }
-                                
-                                // 绑定 Model 中的字符串
-                                text: model.optionsStr
-                                
-                                // 实时回写 Model
-                                onTextChanged: model.optionsStr = text
+                        // 题目输入框
+                        TextField {
+                            Layout.fillWidth: true
+                            placeholderText: "请输入题目内容..."
+                            text: model.question
+                            
+                            color: Theme.textPrimary
+                            placeholderTextColor: Theme.textPlaceholder
+                            background: Rectangle { 
+                                color: Theme.inputBackground 
+                                radius: 4 
+                                border.color: Theme.border
                             }
+                            
+                            // 实时回写 Model
+                            onTextChanged: model.question = text 
+                        }
+
+                        Label { 
+                            text: "选项设置 (每行一个选项):" 
+                            color: Theme.textSecondary
+                            font.pixelSize: 12
+                        }
+
+                        // 选项编辑框
+                        TextArea {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 100
+                            placeholderText: "选项1\n选项2\n选项3\n选项4"
+                            
+                            color: Theme.textPrimary
+                            placeholderTextColor: Theme.textPlaceholder
+                            background: Rectangle { 
+                                color: Theme.inputBackground 
+                                radius: 4 
+                                border.color: Theme.border
+                            }
+                            
+                            // 绑定 Model 中的字符串
+                            text: model.optionsStr
+                            
+                            // 实时回写 Model
+                            onTextChanged: model.optionsStr = text
                         }
                     }
                 }
             }
+        }
 
-            // 底部添加按钮
-            Button {
-                text: "+ 添加新问题"
-                Layout.fillWidth: true
-                Layout.preferredHeight: 50
-                
-                contentItem: Text {
-                    text: parent.text
-                    color: "white"
-                    font.bold: true
-                    font.pixelSize: 16
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-                
-                background: Rectangle {
-                    color: parent.down ? "#1976d2" : "#2196F3"
-                    radius: 4
-                }
+        // 底部添加按钮
+        Button {
+            text: "+ 添加新问题"
+            Layout.fillWidth: true
+            Layout.preferredHeight: 50
+            
+            contentItem: Text {
+                text: parent.text
+                color: Theme.textInverted
+                font.bold: true
+                font.pixelSize: 16
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+            
+            background: Rectangle {
+                color: parent.down ? Theme.primaryHover : Theme.primary
+                radius: 4
+            }
 
-                onClicked: {
-                    questionsModel.append({
-                        "question": "",
-                        "type": "single",
-                        "optionsStr": "从不\n偶尔\n经常\n总是" // 默认选项
-                    })
-                    // 滚动到底部
-                    qList.positionViewAtEnd()
-                }
+            onClicked: {
+                questionsModel.append({
+                    "question": "",
+                    "type": "single",
+                    "optionsStr": "从不\n偶尔\n经常\n总是" // 默认选项
+                })
+                // 滚动到底部
+                qList.positionViewAtEnd()
             }
         }
     }
 
-    // 保存逻辑函数
+    // 保存
     function saveSurvey() {
         // 基础校验
         if (surveyTitle.text.trim() === "") {

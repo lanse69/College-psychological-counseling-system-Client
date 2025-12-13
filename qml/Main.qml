@@ -9,6 +9,8 @@ ApplicationWindow {
     height: 768
     title: "高校心理咨询系统"
 
+    color: Theme.background
+
     SessionController {
         id: sessionCtrl
 

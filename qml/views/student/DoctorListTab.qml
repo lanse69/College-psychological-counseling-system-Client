@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import PsyClient
 
 Item {
     id: tabRoot
@@ -31,9 +32,9 @@ Item {
 
         Label {
             text: "心理咨询师列表"
+            color: Theme.textPrimary
             font.bold: true
             font.pixelSize: 22
-            color: "white" 
         }
 
         ListView {
@@ -47,9 +48,9 @@ Item {
             delegate: Rectangle {
                 width: ListView.view.width
                 height: 100
-                color: "white"
+                color: Theme.surface
                 radius: 8
-                border.color: "#ddd"
+                border.color: Theme.border
 
                 RowLayout {
                     anchors.fill: parent
@@ -59,11 +60,11 @@ Item {
                     Rectangle {
                         width: 50; height: 50
                         radius: 25
-                        color: "#ccc"
+                        color: Theme.divider
                         Text { 
                             text: model.realName ? model.realName.charAt(0) : "?" 
                             anchors.centerIn: parent
-                            color: "black"
+                            color: Theme.textPrimary
                         }
                     }
 
@@ -73,11 +74,11 @@ Item {
                             text: model.realName || "未知姓名"
                             font.bold: true
                             font.pixelSize: 18 
-                            color: "#333"
+                            color: Theme.textPrimary
                         }
                         Text { 
                             text: "擅长: " + (model.specializedField || "通用心理咨询")
-                            color: "#666" 
+                            color: Theme.textSecondary
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }

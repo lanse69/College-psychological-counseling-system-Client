@@ -92,6 +92,7 @@ signals:
 
 private slots:
     void onResponseReceived(const QJsonObject &data);
+    void onNotificationReceived(const QJsonObject &data);
 
 private:
     BookingModel* m_bookingModel;

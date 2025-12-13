@@ -1,10 +1,11 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import PsyClient
 
 Page {
     id: loginPage
-    background: Rectangle { color: "#f0f2f5" }
+    background: Rectangle { color: Theme.background }
 
     // 页面显示时自动清空密码和错误信息
     onVisibleChanged: {
@@ -14,15 +15,34 @@ Page {
         }
     }
 
+    header: Item {
+        height: 50
+        RowLayout {
+            anchors.right: parent.right
+            anchors.rightMargin: 20
+            anchors.verticalCenter: parent.verticalCenter
+            
+            Label {
+                text: Theme.isDark ? "深色" : "浅色"
+                color: Theme.textSecondary
+            }
+            Switch {
+                checked: Theme.isDark
+                onToggled: Theme.toggle()
+            }
+        }
+    }
+
     ColumnLayout {
         anchors.centerIn: parent
         spacing: 20
         width: 300
 
         Text {
-            text: "高校心理咨询系统 登录"
+            text: "高校心理咨询系统"
             font.pixelSize: 24
             font.bold: true
+            color: Theme.textPrimary
             Layout.alignment: Qt.AlignHCenter
         }
 
@@ -33,6 +53,13 @@ Page {
                 text: "10.252.38.254"
                 placeholderText: "服务端 IP 地址"
                 Layout.fillWidth: true
+                color: Theme.textPrimary
+                placeholderTextColor: Theme.textPlaceholder
+                background: Rectangle {
+                    color: Theme.inputBackground
+                    radius: 4
+                    border.color: Theme.border
+                }
             }
             Button {
                 text: sessionCtrl.isConnected ? "已连接至服务器" : "未连接服务器"
@@ -45,7 +72,7 @@ Page {
 
         Label {
             text: sessionCtrl.isConnected ? "服务器连接正常" : "服务器未连接"
-            color: sessionCtrl.isConnected ? "green" : "red"
+            color: sessionCtrl.isConnected ? Theme.success : Theme.error
             Layout.alignment: Qt.AlignHCenter
             font.pixelSize: 12
         }
@@ -56,7 +83,13 @@ Page {
             placeholderText: "用户名"
             Layout.fillWidth: true
             selectByMouse: true
-
+            color: Theme.textPrimary
+            placeholderTextColor: Theme.textPlaceholder
+            background: Rectangle {
+                color: Theme.inputBackground
+                radius: 4
+                border.color: Theme.border
+            }
             onAccepted: passField.forceActiveFocus()
         }
 
@@ -67,7 +100,13 @@ Page {
             echoMode: TextInput.Password
             Layout.fillWidth: true
             selectByMouse: true
-
+            color: Theme.textPrimary
+            placeholderTextColor: Theme.textPlaceholder
+            background: Rectangle {
+                color: Theme.inputBackground
+                radius: 4
+                border.color: Theme.border
+            }
             onAccepted: {
                 if (sessionCtrl.isConnected) {
                     sessionCtrl.login(userField.text, passField.text)
@@ -90,7 +129,7 @@ Page {
 
         Label {
             id: statusLabel
-            color: "red"
+            color: Theme.error
             visible: text !== ""
             Layout.alignment: Qt.AlignHCenter
             wrapMode: Text.WordWrap

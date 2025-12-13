@@ -53,7 +53,7 @@ Page {
 
     Rectangle {
         anchors.fill: parent
-        color: "#1e1e1e"
+        color: Theme.background
 
         ColumnLayout {
             anchors.fill: parent
@@ -63,7 +63,7 @@ Page {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 80
-                color: "#2b2b2b"
+                color: Theme.surface
 
                 RowLayout {
                     anchors.fill: parent
@@ -73,8 +73,8 @@ Page {
                     Button {
                         text: "<"
                         Layout.preferredWidth: 40; Layout.preferredHeight: 40
-                        background: Rectangle { color: parent.down ? "#444" : "#555"; radius: 20 }
-                        contentItem: Text { text: "<"; color: "white"; font.pixelSize: 18; anchors.centerIn: parent }
+                        background: Rectangle { color: parent.down ? Theme.background : Theme.surface; radius: 20 }
+                        contentItem: Text { text: "<"; color: Theme.textPrimary; font.pixelSize: 18; anchors.centerIn: parent }
                         onClicked: {
                             currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1)
                             refreshData() // 切换月份时重新拉取数据
@@ -83,15 +83,15 @@ Page {
 
                     Label {
                         text: currentMonth.toLocaleDateString(Qt.locale("zh_CN"), "yyyy年MM月")
-                        font.bold: true; font.pixelSize: 24; color: "white"
+                        font.bold: true; font.pixelSize: 24; color: Theme.textPrimary
                         Layout.fillWidth: true; Layout.alignment: Qt.AlignHCenter
                     }
 
                     Button {
                         text: ">"
                         Layout.preferredWidth: 40; Layout.preferredHeight: 40
-                        background: Rectangle { color: parent.down ? "#444" : "#555"; radius: 20 }
-                        contentItem: Text { text: ">"; color: "white"; font.pixelSize: 18; anchors.centerIn: parent }
+                        background: Rectangle { color: parent.down ? Theme.background : Theme.surface; radius: 20 }
+                        contentItem: Text { text: ">"; color: Theme.textPrimary; font.pixelSize: 18; anchors.centerIn: parent }
                         onClicked: {
                             currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1)
                             refreshData() // 切换月份时重新拉取数据
@@ -110,14 +110,14 @@ Page {
 
             // 星期标题
             Rectangle {
-                Layout.fillWidth: true; Layout.preferredHeight: 40; color: "#333"
+                Layout.fillWidth: true; Layout.preferredHeight: 40; color: Theme.surface
                 RowLayout {
                     anchors.fill: parent; spacing: 1
                     Repeater {
                         model: ["日", "一", "二", "三", "四", "五", "六"]
                         delegate: Rectangle {
-                            Layout.fillHeight: true; Layout.fillWidth: true; color: "#444"
-                            Text { text: modelData; color: "white"; anchors.centerIn: parent }
+                            Layout.fillHeight: true; Layout.fillWidth: true; color: Theme.inputBackground
+                            Text { text: modelData; color: Theme.textPrimary; anchors.centerIn: parent }
                         }
                     }
                 }
@@ -136,8 +136,8 @@ Page {
                 delegate: Rectangle {
                     width: calendarGrid.cellWidth
                     height: calendarGrid.cellHeight
-                    color: model.isCurrentMonth ? "#2b2b2b" : "#1e1e1e"
-                    border.color: model.isToday ? "#4CAF50" : "#555"
+                    color: model.isCurrentMonth ? Theme.inputBackground : Theme.surface
+                    border.color: model.isToday ? Theme.success : Theme.textPlaceholder
                     border.width: model.isToday ? 2 : 1
 
                     property int mask: model.scheduleMask 
@@ -158,7 +158,7 @@ Page {
                         // 日期数字
                         Text {
                             text: model.day
-                            color: model.isToday ? "#4CAF50" : (model.isCurrentMonth ? "white" : "#666")
+                            color: model.isToday ? Theme.success : (model.isCurrentMonth ? Theme.textPrimary : Theme.textPlaceholder)
                             font.bold: model.isToday
                             font.pixelSize: 16
                             Layout.alignment: Qt.AlignRight
@@ -168,7 +168,7 @@ Page {
                         Rectangle {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 6
-                            color: "#444"
+                            color: Theme.inputBackground
                             radius: 3
                             visible: model.isCurrentMonth
 
@@ -176,8 +176,8 @@ Page {
                                 height: parent.height
                                 width: parent.width * (parent.parent.parent.freeCount / 7.0)
                                 radius: 3
-                                color: parent.parent.parent.freeCount > 3 ? "#4CAF50" : 
-                                       (parent.parent.parent.freeCount > 0 ? "#FFC107" : "#F44336")
+                                color: parent.parent.parent.freeCount > 3 ? Theme.success : 
+                                       (parent.parent.parent.freeCount > 0 ? Theme.warning : Theme.error)
                             }
                         }
 
@@ -186,7 +186,7 @@ Page {
                             text: model.isCurrentMonth ? 
                                   (parent.parent.freeCount === 0 ? "休息" : "余 " + parent.parent.freeCount) 
                                   : ""
-                            color: parent.parent.freeCount > 0 ? "#ccc" : "#F44336"
+                            color: parent.parent.freeCount > 0 ? Theme.textSecondary : Theme.error
                             font.pixelSize: 12
                             Layout.alignment: Qt.AlignHCenter
                         }
@@ -218,8 +218,8 @@ Page {
         closePolicy: Popup.NoAutoClose
 
         background: Rectangle {
-            color: "#333"
-            border.color: "#555"
+            color: Theme.surface
+            border.color: Theme.border
             radius: 8
         }
 
@@ -228,15 +228,15 @@ Page {
 
             Label {
                 text: "时段开放管理"
-                font.bold: true; font.pixelSize: 18; color: "white"
+                font.bold: true; font.pixelSize: 18; color: Theme.textPrimary
             }
             
             Label {
                 text: "开启 = 可预约，关闭 = 休息/忙碌"
-                color: "#999"; font.pixelSize: 12
+                color: Theme.textSecondary; font.pixelSize: 12
             }
 
-            Rectangle { height: 1; Layout.fillWidth: true; color: "#555" }
+            Rectangle { height: 1; Layout.fillWidth: true; color: Theme.divider }
 
             ScrollView {
                 Layout.fillWidth: true
@@ -260,7 +260,7 @@ Page {
                                 spacing: 10
                                 Label {
                                     text: modelData
-                                    color: "white"
+                                    color: Theme.textPrimary
                                     font.pixelSize: 16
                                     Layout.fillWidth: true
                                 }
@@ -277,13 +277,13 @@ Page {
                                     }
                                 }
                             }
-                            background: Rectangle { color: parent.hovered ? "#444" : "transparent" }
+                            background: Rectangle { color: parent.hovered ? Theme.primaryHover : "transparent" }
                         }
                     }
                 }
             }
 
-            Rectangle { height: 1; Layout.fillWidth: true; color: "#555" }
+            Rectangle { height: 1; Layout.fillWidth: true; color: Theme.divider }
 
             RowLayout {
                 Layout.fillWidth: true

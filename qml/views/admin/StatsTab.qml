@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import PsyClient
 
 Item {
     id: tabRoot
@@ -67,9 +68,9 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: "white"
+            color: Theme.surface
             radius: 8
-            border.color: "#ddd"
+            border.color: Theme.border
 
             ColumnLayout {
                 anchors.fill: parent
@@ -78,6 +79,7 @@ Item {
                 Label { 
                     text: currentTitle
                     font.bold: true
+                    color: Theme.textPrimary
                     Layout.alignment: Qt.AlignHCenter
                 }
 
@@ -115,7 +117,7 @@ Item {
                         var gap = drawW / data.length;
 
                         // 绘制坐标轴
-                        ctx.strokeStyle = "#ccc";
+                        ctx.strokeStyle = Theme.divider;
                         ctx.beginPath();
                         ctx.moveTo(padding, padding);
                         ctx.lineTo(padding, h - padding); // Y轴
@@ -131,15 +133,13 @@ Item {
                             var y = h - padding - barH;
 
                             // 柱子
-                            ctx.fillStyle = "#2196F3";
+                            ctx.fillStyle = Theme.primary;
                             ctx.fillRect(x, y, barWidth, barH);
 
                             // 数值
-                            ctx.fillStyle = "#333";
+                            ctx.fillStyle = Theme.textPrimary;
                             ctx.font = "12px sans-serif";
                             ctx.fillText(item.value, x + barWidth/2 - 5, y - 5);
-
-                            // X轴标签
                             ctx.fillText(item.label, x, h - padding + 15);
                         }
                     }

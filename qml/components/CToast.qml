@@ -1,12 +1,13 @@
 import QtQuick
 import QtQuick.Controls
+import PsyClient
 
 Rectangle {
     id: root
     width: msgLbl.width + 40
     height: 40
     radius: 5
-    color: "#333333"
+    color: Theme.surface
     opacity: 0
     anchors.centerIn: parent
     anchors.verticalCenterOffset: parent.height / 3
@@ -17,18 +18,18 @@ Rectangle {
     Text {
         id: msgLbl
         anchors.centerIn: parent
-        color: "white"
+        color: Theme.textPrimary
         font.pixelSize: 14
     }
 
     function show(message, colorCode) {
         root.text = message
         if (colorCode === "red") {
-            root.color = "#dd3333"
+            root.color = Theme.error
         } else if (colorCode === "green") {
-            root.color = "#33aa33"
+            root.color = Theme.success
         } else {
-            root.color = "#333333"
+            root.color = Theme.surfaceHighlight
         }
         anim.restart()
     }

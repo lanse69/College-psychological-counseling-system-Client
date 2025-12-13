@@ -29,7 +29,7 @@ PsyClient/
 │   │   └── Theme.qml                  # 全局样式（颜色、字体）
 │   ├── components/                    # 通用 UI 组件
 │   │   ├── CCalendar.qml              # 自定义日历控件（用于展示排班）
-│   │   ├── CChart.qml                 # 图表控件（使用 Canvas 绘制统计图）
+│   │   ├── CChart.qml                 # 图表控件
 │   │   └── CToast.qml                 # 消息提示弹窗
 │   └── views/                         # 具体业务页面
 │       ├── LoginView.qml              # 登录/注册页
@@ -51,27 +51,3 @@ PsyClient/
 │           ├── AdminDash.qml          # 管理员主控台
 │           ├── UserMgmtTab.qml        # 增删改查用户
 │           └── StatsTab.qml           # 数据报表展示页
-
-2. 关键文件功能详解
-
-src/network/NetworkClient.cpp:
-功能: 负责底层的 socket 通信。
-接口: 提供 sendRequest(QJsonObject data)。
-信号: dataReceived(QJsonObject response)。它不知道业务逻辑，只管收发。
-
-src/controllers/StudentController.cpp:
-功能: 处理学生端的预约修改逻辑。
-流程: 当 QML 点击“修改预约” -> 调用此类的 modifyBooking() -> 封装 JSON -> 通过 NetworkClient 发送 -> 等待服务端响应 -> 若成功，发射信号刷新 BookingModel。
-
-src/controllers/DoctorController.cpp:
-功能: 处理医生端的“协商”逻辑。
-流程: 收到 notificationReceived 信号（来自服务端推送） -> 提示“医生申请修改预约” -> 学生点击“同意” -> 发送 JSON 。
-
-src/models/DoctorListModel.cpp:
-功能: 继承 QAbstractListModel。
-作用: 将 C++ 中的 QVector<DoctorInfo> 映射为 QML 可直接使用的 Model。
-QML 用法: ListView { model: doctorController.doctorListModel; delegate: DoctorCard {...} }。
-
-qml/views/admin/StatsView.qml:
-功能: 接收 AdminController 传来的 JSON 数组。
-实现: 使用 QML 的 Canvas 或者 Charts 模块，根据数据绘制柱状图（例如：X轴=月份，Y轴=咨询人数）。

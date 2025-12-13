@@ -16,7 +16,7 @@ Page {
     header: ToolBar {
         height: 60
         topPadding: 10
-        background: Rectangle { color: "#333" }
+        background: Rectangle { color: Theme.background }
         
         Button {
             text: "返回"
@@ -26,7 +26,7 @@ Page {
             
             contentItem: Text {
                 text: parent.text
-                color: "white"
+                color: Theme.textPrimary
             }
             background: Rectangle { color: "transparent" }
             
@@ -36,7 +36,7 @@ Page {
         Label {
             text: "心理测评"
             font.pixelSize: 18
-            color: "white"
+            color: Theme.textPrimary
             anchors.centerIn: parent
         }
     }
@@ -84,7 +84,7 @@ Page {
     // 主体内容区
     Rectangle {
         anchors.fill: parent
-        color: "#1e1e1e"
+        color: Theme.surface
 
         ColumnLayout {
             anchors.fill: parent
@@ -94,7 +94,7 @@ Page {
             Label {
                 id: surveyTitleLabel
                 text: "加载中..."
-                color: "white"
+                color: Theme.textPrimary
                 font.bold: true
                 font.pixelSize: 22
                 Layout.alignment: Qt.AlignHCenter
@@ -123,9 +123,9 @@ Page {
                             Layout.fillWidth: true
                             Layout.preferredHeight: itemCol.implicitHeight + 40
                             
-                            color: "#2b2b2b"
+                            color: Theme.surface
                             radius: 8
-                            border.color: "#444"
+                            border.color: Theme.border
 
                             // 存储当前题目的答案
                             property string selectedAnswer: ""
@@ -141,7 +141,7 @@ Page {
                                 // 题目文本
                                 Text {
                                     text: (index + 1) + ". " + ((modelData && modelData.question) ? modelData.question : "Loading...")
-                                    color: "white"
+                                    color: Theme.textPrimary
                                     font.bold: true
                                     font.pixelSize: 16
                                     wrapMode: Text.Wrap
@@ -158,11 +158,15 @@ Page {
                                             id: rbtn
                                             text: modelData
                                             
+                                            spacing: 10
+
                                             contentItem: Text {
                                                 text: rbtn.text
-                                                color: rbtn.checked ? "#4CAF50" : "#ccc"
+                                                color: rbtn.checked ? Theme.primary : Theme.textPrimary
                                                 font.pixelSize: 14
                                                 verticalAlignment: Text.AlignVCenter
+                                                leftPadding: rbtn.indicator ? (rbtn.indicator.width + rbtn.spacing) : 30
+                                                wrapMode: Text.Wrap
                                             }
 
                                             // 如果历史答案存在，且匹配当前选项文本，则默认选中

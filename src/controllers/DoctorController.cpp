@@ -11,6 +11,9 @@ DoctorController::DoctorController(QObject *parent) : BaseController(parent), m_
 {
     connect(&PacketDispatcher::instance(), &PacketDispatcher::onDoctorResponse,
             this, &DoctorController::onResponseReceived);
+
+    connect(&PacketDispatcher::instance(), &PacketDispatcher::onNotification,
+            this, &DoctorController::onNotificationReceived);
 }
 
 QJsonObject DoctorController::myProfile() const { 
@@ -291,4 +294,18 @@ void DoctorController::saveMySurvey(const QString &title, const QVariantList &qu
     data["questions"] = QJsonArray::fromVariantList(questions);
     
     sendRequest(CmdType::DOCTOR_SAVE_SURVEY, data);
+}
+
+void DoctorController::onNotificationReceived(const QJsonObject &root)
+{
+    // 获取 action 字段
+    QString action = root["action"].toString();
+    QString msg = root[JsonKeys::MSG].toString();
+
+    // 包含刷新指令，自动重新获取预约列表
+    if (action == "refresh_appointments") {
+        fetchAppointments(); // 重新拉取数据
+
+        emit operationResult(true, msg);
+    }
 }

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import PsyClient
 
 Item {
     id: tabRoot
@@ -42,7 +43,7 @@ Item {
         Rectangle {
             SplitView.preferredWidth: 300
             SplitView.minimumWidth: 250
-            color: "#f5f5f5"
+            color: Theme.surface
 
             ColumnLayout {
                 anchors.fill: parent
@@ -54,7 +55,7 @@ Item {
                     Layout.margins: 10
                     Label { 
                         text: "用户列表";
-                        color: "black" 
+                        color: Theme.textPrimary
                         font.bold: true
                     }
                     Item { Layout.fillWidth: true }
@@ -69,7 +70,7 @@ Item {
                     }
                 }
 
-                Rectangle { height: 1; Layout.fillWidth: true; color: "#ddd" }
+                Rectangle { height: 1; Layout.fillWidth: true; color: Theme.divider }
 
                 ListView {
                     id: listView
@@ -83,27 +84,32 @@ Item {
                         height: 60
                         highlighted: ListView.isCurrentItem
 
+                        background: Rectangle {
+                            color: parent.highlighted ? Theme.surfaceHighlight : (parent.hovered ? Theme.surfaceHighlight : "transparent")
+                        }
+
                         contentItem: RowLayout {
                             spacing: 10
                             Rectangle {
                                 width: 36; height: 36; radius: 18
-                                color: model.role === 2 ? "#4CAF50" : (model.role === 1 ? "#2196F3" : "#607D8B")
+                                color: model.role === 2 ? Theme.doctorColor : (model.role === 1 ? Theme.studentColor : Theme.adminColor)
                                 Text { 
                                     text: model.role === 2 ? "医" : (model.role === 1 ? "学" : "管")
-                                    color: "white"
+                                    color: Theme.textPrimary
                                     anchors.centerIn: parent
+                                    font.bold: true
                                 }
                             }
                             
                             Column {
                                 Text { 
                                     text: model.realName
-                                    color: "white"
+                                    color: Theme.textPrimary
                                     font.bold: true
                                 }
                                 Text { 
                                     text: model.username
-                                    color: "#666666" 
+                                    color: Theme.textSecondary
                                     font.pixelSize: 12 
                                 }
                             }
@@ -121,7 +127,7 @@ Item {
         // 编辑/新增表单区
         Rectangle {
             SplitView.fillWidth: true
-            color: "white"
+            color: Theme.surface
 
             ScrollView {
                 anchors.fill: parent
@@ -140,12 +146,12 @@ Item {
                         text: isEditMode ? "编辑用户资料" : "创建新用户"
                         font.bold: true
                         font.pixelSize: 22
-                        color: "#333"
+                        color: Theme.textPrimary
                         Layout.alignment: Qt.AlignHCenter
                     }
 
                     // 角色选择
-                    Label { text: "账户角色"; color: "black" }
+                    Label { text: "账户角色"; color: Theme.textPrimary }
                     ComboBox {
                         id: roleCombo
                         Layout.fillWidth: true
@@ -154,18 +160,18 @@ Item {
                     }
 
                     // 登录账号
-                    Label { text: "登录用户名"; color: "black" }
+                    Label { text: "登录用户名"; color: Theme.textPrimary }
                     TextField {
                         id: userField
                         Layout.fillWidth: true
                         placeholderText: "用于登录的唯一账号"
                         readOnly: isEditMode
-                        color: readOnly ? "#666" : "black"
-                        background: Rectangle { color: parent.readOnly ? "#eee" : "white"; border.color: "#ccc" }
+                        color: readOnly ? Theme.textPrimary : Theme.textSecondary
+                        background: Rectangle { color: parent.readOnly ? Theme.background : Theme.inputBackground; border.color: Theme.border }
                     }
 
                     // 真实姓名
-                    Label { text: "真实姓名"; color: "black" }
+                    Label { text: "真实姓名"; color: Theme.textPrimary }
                     TextField {
                         id: nameField
                         Layout.fillWidth: true
@@ -173,7 +179,7 @@ Item {
                     }
 
                     // 密码
-                    Label { text: isEditMode ? "重置密码 (留空则不修改)" : "初始密码"; color: "black" }
+                    Label { text: isEditMode ? "重置密码 (留空则不修改)" : "初始密码"; color: Theme.textPrimary }
                     TextField {
                         id: passField
                         Layout.fillWidth: true
@@ -187,8 +193,8 @@ Item {
                         visible: roleCombo.currentIndex === 1 // 选中医生时显示
                         spacing: 10
 
-                        Rectangle { height: 1; Layout.fillWidth: true; color: "#eee"; Layout.margins: 10 }
-                        Label { text: "医生专业信息"; color: "#4CAF50"; font.bold: true }
+                        Rectangle { height: 1; Layout.fillWidth: true; color: Theme.divider; Layout.margins: 10 }
+                        Label { text: "医生专业信息"; color: Theme.doctorColor; font.bold: true }
 
                         TextField {
                             id: specField
@@ -201,8 +207,8 @@ Item {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 100
                             placeholderText: "医生个人简介..."
-                            color: "black"
-                            background: Rectangle { border.color: "#ccc"; radius: 4 }
+                            color: Theme.textSecondary
+                            background: Rectangle { border.color: Theme.border; radius: 4 }
                         }
                     }
 
@@ -228,10 +234,10 @@ Item {
                             Layout.preferredHeight: 45
                             
                             contentItem: Text { 
-                                text: parent.text; color: "white"; 
+                                text: parent.text; color: Theme.textPrimary; 
                                 horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter 
                             }
-                            background: Rectangle { color: "#D32F2F"; radius: 4 }
+                            background: Rectangle { color: Theme.error; radius: 4 }
                             
                             onClicked: {
                                 confirmDeleteDialog.open()
@@ -299,10 +305,10 @@ Item {
         anchors.centerIn: parent
         width: 300
         standardButtons: Dialog.Yes | Dialog.No
-        background: Rectangle { color: "white"; radius: 5 }
+        background: Rectangle { color: Theme.surface; radius: 5 }
         contentItem: Text { 
             text: "确定要永久删除该用户吗？\n此操作不可恢复。" 
-            color: "black"
+            color: Theme.textPrimary
             wrapMode: Text.Wrap
             padding: 20
         }

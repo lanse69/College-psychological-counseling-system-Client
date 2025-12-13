@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import PsyClient
 
 Item {
     id: tabRoot
@@ -63,7 +64,7 @@ Item {
                 }
             }
 
-            Rectangle { height: 1; Layout.fillWidth: true; color: "#ccc"; Layout.topMargin: 10; Layout.bottomMargin: 10 }
+            Rectangle { height: 1; Layout.fillWidth: true; color: Theme.divider; Layout.topMargin: 10; Layout.bottomMargin: 10 }
 
             Label { text: "基本资料修改"; font.bold: true; font.pixelSize: 16 }
 
@@ -82,10 +83,10 @@ Item {
             TextArea {
                 id: introField
                 placeholderText: "个人简介 (展示给预约学生)..."
-                color: "black"
+                color: Theme.textSecondary
                 Layout.fillWidth: true
                 Layout.preferredHeight: 100
-                background: Rectangle { border.color: "#ccc"; radius: 4 }
+                background: Rectangle { border.color: Theme.divider; radius: 4 }
             }
 
             TextField {

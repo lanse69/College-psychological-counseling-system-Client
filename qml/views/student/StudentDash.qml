@@ -5,19 +5,35 @@ import PsyClient
 
 Page {
     id: root
+    background: Rectangle { color: Theme.background }
 
     header: ToolBar {
         height: 60
         topPadding: 10
-        background: Rectangle { color: "#333" }
+        background: Rectangle { 
+            color: Theme.surface 
+            Rectangle { 
+                width: parent.width; height: 1; 
+                anchors.bottom: parent.bottom; color: Theme.divider 
+            }
+        }
         Label {
             text: "学生端 - " + sessionCtrl.currentUsername
             font.pixelSize: 18
             font.bold: true
-            color: "white"
+            color: Theme.textPrimary
             anchors.centerIn: parent
             anchors.verticalCenterOffset: 5
         }
+
+        Switch {
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: 10
+            checked: Theme.isDark
+            onToggled: Theme.toggle()
+        }
+
         Button {
             text: "注销"
             anchors.right: parent.right
@@ -28,7 +44,6 @@ Page {
         }
     }
 
-    // 全局唯一的 StudentController 实例，供子页面使用
     StudentController {
         id: studentCtrl
         
@@ -46,9 +61,29 @@ Page {
         TabBar {
             id: bar
             Layout.fillWidth: true
-            
-            TabButton { text: "医生" }
-            TabButton { text: "我的预约" }
+            background: Rectangle { color: Theme.surface }
+
+            TabButton { 
+                text: "医生"
+                contentItem: Text {
+                    text: parent.text
+                    color: parent.checked ? Theme.primary : Theme.textSecondary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle { color: "transparent" }
+            }
+
+            TabButton { 
+                text: "我的预约"
+                contentItem: Text {
+                    text: parent.text
+                    color: parent.checked ? Theme.primary : Theme.textSecondary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle { color: "transparent" }
+            }
         }
 
         StackLayout {

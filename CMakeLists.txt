@@ -14,6 +14,9 @@ qt_standard_project_setup(REQUIRES 6.9)
 
 qt_add_executable(appPsyClient)
 
+# 标记 Theme.qml 为单例
+set_source_files_properties(qml/globals/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE true)
+
 qt_add_qml_module(appPsyClient
     URI PsyClient
     VERSION 1.0
@@ -35,7 +38,6 @@ qt_add_qml_module(appPsyClient
         qml/components/CCalendar.qml
         qml/components/CChart.qml
         qml/components/CToast.qml
-        qml/components/PatientList.qml
         qml/globals/Theme.qml
         qml/views/LoginView.qml
         qml/views/admin/AdminDash.qml

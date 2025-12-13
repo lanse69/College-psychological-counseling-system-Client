@@ -9,15 +9,24 @@ Page {
     header: ToolBar {
         height: 60
         topPadding: 10
-        background: Rectangle { color: "#ffffff" }
+        background: Rectangle { color: Theme.background }
         Label {
             text: "医生工作台 - " + sessionCtrl.currentUsername
             font.pixelSize: 18
             font.bold: true
-            color: "#333"
+            color: Theme.textPrimary
             anchors.centerIn: parent
             anchors.verticalCenterOffset: 5
         }
+
+        Switch {
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: 10
+            checked: Theme.isDark
+            onToggled: Theme.toggle()
+        }
+
         Button {
             text: "注销"
             anchors.right: parent.right

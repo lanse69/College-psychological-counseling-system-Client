@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import PsyClient
 
 Item {
     id: tabRoot
@@ -65,9 +66,9 @@ Item {
             delegate: Rectangle {
                 width: ListView.view.width
                 height: 140
-                color: "white"
+                color: Theme.surface
                 radius: 8
-                border.color: "#ddd"
+                border.color: Theme.border
                 
                 visible: true 
 
@@ -82,6 +83,7 @@ Item {
                             text: model.studentName || "未知学生"
                             font.bold: true
                             font.pixelSize: 18
+                            color: Theme.textPrimary
                         }
                         Item { Layout.fillWidth: true }
                         Text { 
@@ -93,16 +95,16 @@ Item {
 
                     Text { 
                         text: "时间: " + model.appointmentDate + " " + model.timeSlotText 
-                        color: "#555"
+                        color: Theme.textSecondary
                     }
                     Text { 
                         text: "备注: " + (model.reason || "无")
-                        color: "#888"
+                        color: Theme.textSecondary
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
 
-                    Rectangle { height: 1; Layout.fillWidth: true; color: "#eee" }
+                    Rectangle { height: 1; Layout.fillWidth: true; color: Theme.divider }
 
                     // 操作按钮区
                     RowLayout {
@@ -115,7 +117,7 @@ Item {
                         Text {
                             visible: model.status === 2 || model.status === 3
                             text: model.status === 2 ? "咨询已归档" : "预约已失效"
-                            color: "#aaa"
+                            color: Theme.textSecondary
                         }
 
                         // 状态 0: 待确认 -> 显示 接受/拒绝
@@ -127,8 +129,8 @@ Item {
                                 rejectDialog.studentName = model.studentName
                                 rejectDialog.open()
                             }
-                            background: Rectangle { color: "#ffebee"; radius: 4; border.color: "#ef5350" }
-                            contentItem: Text { text: "拒绝"; color: "#d32f2f"; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                            background: Rectangle { color: Theme.surface; radius: 4; border.color: Theme.border }
+                            contentItem: Text { text: "拒绝"; color: Theme.error; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                         }
 
                         Button {
@@ -168,11 +170,11 @@ Item {
                             
                             contentItem: Text {
                                 text: parent.text
-                                color: "#d32f2f"
+                                color: Theme.error
                             }
                             background: Rectangle {
                                 color: "transparent"
-                                border.color: "#d32f2f"
+                                border.color: Theme.error
                                 radius: 4
                             }
                             
@@ -205,7 +207,7 @@ Item {
         anchors.centerIn: parent
         standardButtons: Dialog.Yes | Dialog.No
         
-        Text { text: "确定要移除这条已取消的记录吗？"; color: "white"}
+        Text { text: "确定要移除这条已取消的记录吗？"; color: Theme.textPrimary }
         
         onAccepted: {
             controller.deleteAppointment(confirmDeleteDialog.targetId)
@@ -226,14 +228,21 @@ Item {
         property var questions: []
         property var answers: []
 
+        background: Rectangle {
+            color: Theme.surface
+            border.color: Theme.border
+            radius: 8
+        }
+
         contentItem: ColumnLayout {
             Label {
                 text: surveyDetailDialog.surveyTitle
                 font.bold: true; font.pixelSize: 18
                 Layout.alignment: Qt.AlignHCenter
+                color: Theme.textPrimary
             }
-            
-            Rectangle { height: 1; Layout.fillWidth: true; color: "#ccc" }
+
+            Rectangle { height: 1; Layout.fillWidth: true; color: Theme.divider }
 
             ScrollView {
                 Layout.fillWidth: true; Layout.fillHeight: true
@@ -247,13 +256,13 @@ Item {
                         model: surveyDetailDialog.questions
                         delegate: ColumnLayout {
                             Layout.fillWidth: true
-                            spacing: 5
+                            spacing: 8
                             
                             // 题目
                             Text {
                                 text: (index + 1) + ". " + modelData.question
                                 font.bold: true
-                                color: "#c2c9c2ff"
+                                color: Theme.textPrimary
                                 wrapMode: Text.Wrap
                                 Layout.fillWidth: true
                             }
@@ -264,7 +273,7 @@ Item {
                                                      ? surveyDetailDialog.answers[index] 
                                                      : "未作答"
                                 text: "回答: " + ans
-                                color: "#1976D2"
+                                color: Theme.primary
                                 font.pixelSize: 14
                                 Layout.leftMargin: 20
                             }
@@ -274,7 +283,7 @@ Item {
                     Label {
                         visible: surveyDetailDialog.questions.length === 0
                         text: "该学生暂未填写问卷"
-                        color: "#888"
+                        color: Theme.textPlaceholder
                         Layout.alignment: Qt.AlignHCenter
                     }
                 }
@@ -283,7 +292,9 @@ Item {
     }
 
     function getStatusColor(s) {
-        if(s===0) return "#FF9800"; if(s===1) return "#4CAF50"; 
-        if(s===2) return "#2196F3"; return "#9E9E9E";
+        if(s===0) return Theme.warning; 
+        if(s===1) return Theme.success; 
+        if(s===2) return Theme.primary; 
+        return Theme.textPlaceholder;
     }
 }

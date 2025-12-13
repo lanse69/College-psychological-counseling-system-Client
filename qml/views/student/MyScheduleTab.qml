@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import PsyClient
 
 Item {
     id: tabRoot
@@ -40,16 +41,17 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 10
-        spacing: 10
+        anchors.margins: 15
+        spacing: 15
 
+        // 顶部标题栏
         RowLayout {
             Layout.fillWidth: true
             Label {
                 text: "我的预约记录"
                 font.bold: true
                 font.pixelSize: 22
-                color: "white"
+                color: Theme.textPrimary 
             }
             Item { Layout.fillWidth: true }
             Button {
@@ -67,21 +69,25 @@ Item {
 
             delegate: Rectangle {
                 width: ListView.view.width
-                height: 140
-                color: "white"
+                height: 150
+                color: Theme.surface
                 radius: 8
-                border.color: "#ddd"
+                border.color: Theme.border
+                border.width: 1
 
                 ColumnLayout {
                     anchors.fill: parent
                     anchors.margins: 15
-                    spacing: 5
+                    spacing: 6
 
+                    // 日期 + 状态
                     RowLayout {
                         Layout.fillWidth: true
                         Text { 
                             text: model.date
-                            font.bold: true; font.pixelSize: 16; color: "#333" 
+                            font.bold: true
+                            font.pixelSize: 16
+                            color: Theme.textPrimary 
                         }
                         Item { Layout.fillWidth: true }
                         Text {
@@ -91,27 +97,44 @@ Item {
                         }
                     }
                     
+                    // 详细信息
                     Text { 
                         text: "时间: " + getTimeSlotStr(model.timeSlot)
-                        color: "#555" 
+                        color: Theme.textSecondary 
                     }
                     Text { 
                         text: "医生: " + model.doctorName
-                        color: "#555" 
+                        color: Theme.textSecondary 
                     }
 
-                    Rectangle { height: 1; Layout.fillWidth: true; color: "#eee" }
+                    // 分割线
+                    Rectangle { height: 1; Layout.fillWidth: true; color: Theme.divider }
 
+                    // 操作按钮区
                     RowLayout {
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignRight
                         spacing: 10
                         
-                        Item { Layout.fillWidth: true } // 占位，把按钮挤到右边
+                        Item { Layout.fillWidth: true } // 占位
 
-                        // 只有待确认(0)或已确认(1)可取消
+                        // 修改预约
+                        // 仅待确认(0)或已确认(1)可修改
                         Button {
-                            text: "取消预约"
+                            text: "修改时间"
+                            visible: model.status === 0 || model.status === 1
+                            onClicked: {
+                                modifyDialog.targetId = model.id
+                                modifyDialog.selectedDate = model.date // 原日期
+                                modifyDialog.selectedSlot = model.timeSlot // 原时间
+                                modifyDialog.open()
+                            }
+                        }
+
+                        // 取消预约
+                        // 仅待确认(0)或已确认(1)可取消
+                        Button {
+                            text: "取消"
                             visible: model.status === 0 || model.status === 1
                             onClicked: {
                                 cancelDialog.targetId = model.id
@@ -119,7 +142,7 @@ Item {
                             }
                         }
                         
-                        // 只有待确认(0)或已确认(1)可填写问卷
+                        // 心理问卷
                         Button {
                             text: "心理问卷"
                             visible: model.status === 0 || model.status === 1
@@ -135,10 +158,10 @@ Item {
                             }
                         }
 
-                        // "查看报告" 按钮
+                        // 查看报告
                         Button {
                             text: "查看报告"
-                            visible: model.status === 2
+                            visible: model.status === 2 // 已完成
                             highlighted: true
                             onClicked: {
                                 if (model.report !== "" || model.resultTags !== "") {
@@ -154,19 +177,20 @@ Item {
                             }
                         }
 
-                        // 删除记录按钮
+                        // 删除记录
                         Button {
                             text: "删除记录"
-                            visible: model.status === 3
+                            visible: model.status === 3 // 已取消
                             
                             contentItem: Text {
                                 text: parent.text
-                                color: "white"
+                                color: Theme.error
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
                             }
                             background: Rectangle {
-                                color: "#d32f2f"
+                                color: "transparent"
+                                border.color: Theme.error
                                 radius: 4
                             }
                             
@@ -181,6 +205,80 @@ Item {
         }
     }
 
+    // 修改预约
+    Dialog {
+        id: modifyDialog
+        title: "修改预约时间"
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+        width: 400
+        modal: true
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        property int targetId: 0
+        property string selectedDate: ""
+        property int selectedSlot: -1
+
+        background: Rectangle {
+            color: Theme.surface
+            radius: 5
+            border.color: Theme.border
+        }
+
+        contentItem: ColumnLayout {
+            spacing: 15
+            Label { 
+                text: "请选择新的日期 (格式: YYYY-MM-DD)"
+                color: Theme.textSecondary
+            }
+            
+            TextField {
+                id: dateField
+                text: modifyDialog.selectedDate
+                placeholderText: "YYYY-MM-DD"
+                Layout.fillWidth: true
+                color: Theme.textPrimary
+                placeholderTextColor: Theme.textPlaceholder
+                background: Rectangle {
+                    color: Theme.inputBackground
+                    border.color: Theme.border
+                    radius: 4
+                }
+                onTextEdited: modifyDialog.selectedDate = text
+            }
+
+            Label { 
+                text: "选择时间段:" 
+                color: Theme.textSecondary
+            }
+            
+            Flow {
+                Layout.fillWidth: true
+                spacing: 8
+                Repeater {
+                    model: ["08:30", "09:30", "10:30", "14:30", "15:30", "16:30", "17:30"]
+                    delegate: Button {
+                        text: modelData
+                        checkable: true
+                        checked: modifyDialog.selectedSlot === index
+                        highlighted: checked
+                        onClicked: modifyDialog.selectedSlot = index
+                    }
+                }
+            }
+        }
+        
+        onAccepted: {
+            if (modifyDialog.selectedDate.length >= 8 && modifyDialog.selectedSlot >= 0) {
+                // 调用 Controller 的修改接口
+                controller.modifyAppointment(targetId, modifyDialog.selectedDate, modifyDialog.selectedSlot)
+            } else {
+                appWindow.showToast("请填写完整信息", true)
+            }
+        }
+    }
+
+    // 取消确认
     Dialog {
         id: cancelDialog
         property int targetId: 0
@@ -190,16 +288,44 @@ Item {
         modal: true
         width: 300
         standardButtons: Dialog.Yes | Dialog.No
-        background: Rectangle { color: "white"; radius: 5 }
+
+        background: Rectangle { color: Theme.surface; radius: 5; border.color: Theme.border }
+        
         contentItem: Text { 
             text: "确定要取消此预约吗？"
-            color: "black" 
+            color: Theme.textPrimary
             font.pixelSize: 16
             padding: 20
+            wrapMode: Text.Wrap
         }
         onAccepted: controller.cancelAppointment(cancelDialog.targetId)
     }
 
+    // 删除确认
+    Dialog {
+        id: confirmDeleteDialog
+        property int targetId: 0
+        title: "确认删除"
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+        width: 300
+        standardButtons: Dialog.Yes | Dialog.No
+        
+        background: Rectangle { color: Theme.surface; radius: 5; border.color: Theme.border }
+        
+        contentItem: Text {
+            text: "确定要彻底删除这条预约记录吗？"
+            color: Theme.textPrimary
+            wrapMode: Text.Wrap
+            padding: 20
+        }
+        
+        onAccepted: {
+            controller.deleteAppointment(confirmDeleteDialog.targetId)
+        }
+    }
+
+    // 报告详情
     Dialog {
         id: reportDetailDialog
         title: "咨询结果报告"
@@ -217,9 +343,9 @@ Item {
         property string doctorName: ""
         
         background: Rectangle {
-            color: "white"
+            color: Theme.surface
             radius: 5
-            border.color: "#ccc"
+            border.color: Theme.border
         }
 
         contentItem: ScrollView {
@@ -230,69 +356,48 @@ Item {
             ColumnLayout {
                 width: reportDetailDialog.availableWidth
                 spacing: 15
+                
                 Label {
                     text: "医生: " + reportDetailDialog.doctorName
                     font.bold: true
-                    color: "#555"
+                    color: Theme.textSecondary
                 }
 
-                Rectangle { height: 1; Layout.fillWidth: true; color: "#ddd" }
+                Rectangle { height: 1; Layout.fillWidth: true; color: Theme.divider }
 
-                Label { text: "评估标签"; font.bold: true; color: "#1976D2" }
+                Label { text: "评估标签"; font.bold: true; color: Theme.primary }
                 Text {
                     text: reportDetailDialog.resultTags || "无标签"
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
-                    color: "#333"
+                    color: Theme.textPrimary
                 }
 
-                Label { text: "详细报告/建议"; font.bold: true; color: "#1976D2" }
+                Label { text: "详细报告/建议"; font.bold: true; color: Theme.primary }
                 Text {
                     text: reportDetailDialog.reportContent || "医生暂未填写详细内容"
                     wrapMode: Text.Wrap
                     Layout.fillWidth: true
                     font.pixelSize: 14
                     lineHeight: 1.4
-                    color: "#333"
+                    color: Theme.textPrimary
                 }
             }
         }
     }
 
-    Dialog {
-        id: confirmDeleteDialog
-        property int targetId: 0
-        title: "确认删除"
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        width: 300
-        standardButtons: Dialog.Yes | Dialog.No
-        
-        background: Rectangle {
-            color: "white"
-            radius: 5
-        }
-        
-        contentItem: Text {
-            text: "确定要彻底删除这条预约记录吗？"
-            color: "#333"
-            wrapMode: Text.Wrap
-            padding: 20
-        }
-        
-        onAccepted: {
-            controller.deleteAppointment(confirmDeleteDialog.targetId)
-        }
-    }
-
+    // 状态文字
     function getStatusStr(s) {
         if(s===0) return "待确认"; if(s===1) return "已确认"; 
         if(s===2) return "已完成"; if(s===3) return "已取消"; return "未知";
     }
 
+    // 状态颜色
     function getStatusColor(s) {
-        if(s===0) return "#FF9800"; if(s===1) return "#4CAF50"; 
-        if(s===2) return "#2196F3"; return "#9E9E9E";
+        if(s===0) return Theme.warning;
+        if(s===1) return Theme.success;
+        if(s===2) return Theme.primary;
+        return Theme.textSecondary;
     }
 
     function getTimeSlotStr(slot) {

@@ -7,7 +7,6 @@ Page {
     id: root
     title: "预约医生"
     
-    // 由 DoctorListTab 传入
     property var selectedDoctor: null
     
     property string selectedDate: ""
@@ -50,33 +49,44 @@ Page {
             Rectangle {
                 Layout.fillWidth: true
                 height: 150
-                color: "white"
+                color: Theme.surface
+                border.color: Theme.border
                 radius: 10
-                border.color: "#ddd"
 
                 ColumnLayout {
                     anchors.centerIn: parent
                     spacing: 10
                     Text { 
                         text: selectedDoctor ? selectedDoctor.realName : ""
+                        color: Theme.textPrimary
                         font.bold: true; font.pixelSize: 24 
                     }
                     Text { 
                         text: selectedDoctor ? ("领域: " + selectedDoctor.specializedField) : ""
-                        color: "#666"; font.pixelSize: 16
+                        color: Theme.textSecondary; font.pixelSize: 16
                     }
                     Text { 
                         text: selectedDoctor ? selectedDoctor.intro : ""
-                        color: "#888"; width: parent.width; horizontalAlignment: Text.AlignHCenter 
+                        color: Theme.textSecondary; width: parent.width; horizontalAlignment: Text.AlignHCenter 
                     }
                 }
             }
 
             // 日期选择
-            Label { text: "预约日期 (YYYY-MM-DD):" }
+            Label { 
+                text: "预约日期 (YYYY-MM-DD):"
+                color: Theme.textPrimary
+            }
+
             TextField {
                 id: dateInput
                 Layout.fillWidth: true
+                color: Theme.textPrimary
+                background: Rectangle {
+                    color: Theme.inputBackground
+                    border.color: Theme.border
+                    radius: 4
+                }
                 text: Qt.formatDate(new Date(), "yyyy-MM-dd")
                 onTextChanged: selectedDate = text
             }
@@ -109,13 +119,14 @@ Page {
                 
                 contentItem: Text {
                     text: parent.text
-                    color: "white"
+                    color: Theme.textPrimary
                     font.bold: true
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
+                
                 background: Rectangle {
-                    color: parent.down ? "#1976d2" : "#2196F3"
+                    color: parent.down ? Theme.primaryHover : Theme.primary
                     radius: 5
                 }
 
