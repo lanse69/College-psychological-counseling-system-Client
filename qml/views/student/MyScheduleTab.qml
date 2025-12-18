@@ -30,6 +30,8 @@ Item {
                 item.timeSlot = (item.timeSlot !== undefined) ? item.timeSlot : -1
                 item.report = item.report || ""
                 item.resultTags = item.resultTags || ""
+                item.pendingDate = item.pendingDate || ""
+                item.pendingSlot = (item.pendingSlot !== undefined) ? item.pendingSlot : -1
                 scheduleModel.append(item)
             }
         }
@@ -91,8 +93,8 @@ Item {
                         }
                         Item { Layout.fillWidth: true }
                         Text {
-                            text: getStatusStr(model.status)
-                            color: getStatusColor(model.status)
+                            text: model.status === 4 ? "待确认修改" : getStatusStr(model.status)
+                            color: model.status === 4 ? Theme.primary : getStatusColor(model.status)
                             font.bold: true
                         }
                     }
@@ -107,6 +109,35 @@ Item {
                         color: Theme.textSecondary 
                     }
 
+                    Rectangle {
+                        visible: model.status === 4
+                        Layout.fillWidth: true
+                        height: 45
+                        color: Theme.surfaceHighlight
+                        radius: 4
+                        border.color: Theme.primary
+                        border.width: 1
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: 8
+                            spacing: 10
+                            
+                            Text {
+                                text: "医生建议修改至:"
+                                color: Theme.textSecondary
+                                font.pixelSize: 12
+                            }
+                            
+                            Text {
+                                text: model.pendingDate + " " + getTimeSlotStr(model.pendingSlot)
+                                color: Theme.primary
+                                font.bold: true
+                                font.pixelSize: 14
+                            }
+                        }
+                    }
+
                     // 分割线
                     Rectangle { height: 1; Layout.fillWidth: true; color: Theme.divider }
 
@@ -118,11 +149,26 @@ Item {
                         
                         Item { Layout.fillWidth: true } // 占位
 
+                        // 同意修改
+                        Button {
+                            text: "同意修改"
+                            visible: model.status === 4
+                            highlighted: true
+                            onClicked: controller.replyModification(model.id, true)
+                        }
+
+                        // 拒绝修改
+                        Button {
+                            text: "拒绝"
+                            visible: model.status === 4
+                            onClicked: controller.replyModification(model.id, false)
+                        }
+
                         // 修改预约
                         // 仅待确认(0)或已确认(1)可修改
                         Button {
                             text: "修改时间"
-                            visible: model.status === 0 || model.status === 1
+                            visible: (model.status === 0 || model.status === 1) && model.status !== 4
                             onClicked: {
                                 modifyDialog.targetId = model.id
                                 modifyDialog.selectedDate = model.date // 原日期
@@ -256,13 +302,26 @@ Item {
                 Layout.fillWidth: true
                 spacing: 8
                 Repeater {
-                    model: ["08:30", "09:30", "10:30", "14:30", "15:30", "16:30", "17:30"]
+                    model: ["08:30-09:30", "09:30-10:30", "10:30-11:30", 
+                                "14:30-15:30", "15:30-16:30", "16:30-17:30", "17:30-18:30"]
                     delegate: Button {
                         text: modelData
                         checkable: true
                         checked: modifyDialog.selectedSlot === index
                         highlighted: checked
                         onClicked: modifyDialog.selectedSlot = index
+                        
+                        contentItem: Text {
+                            text: parent.text
+                            color: parent.checked ? Theme.textInverted : Theme.textPrimary
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                        background: Rectangle {
+                            color: parent.checked ? Theme.primary : "transparent"
+                            border.color: parent.checked ? Theme.primary : Theme.border
+                            radius: 4
+                        }
                     }
                 }
             }

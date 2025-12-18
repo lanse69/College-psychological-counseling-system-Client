@@ -20,9 +20,7 @@ PsyClient/
 │   │   ├── DoctorController.h/cpp     # 医生操作：排班管理、处理修改请求、写报告
 │   │   └── AdminController.h/cpp      # 管理员操作：用户管理、获取报表数据
 │   └── models/                        # QAbstractListModel 实现类（用于 QML ListView 数据绑定）
-│       ├── DoctorListModel.h/cpp      # 医生列表数据源
 │       ├── BookingModel.h/cpp         # 预约记录列表数据源
-│       └── ChatModel.h/cpp            # 咨询记录列表
 ├── qml/
 │   ├── Main.qml                       # 根窗口 (StackView)
 │   ├── globals/

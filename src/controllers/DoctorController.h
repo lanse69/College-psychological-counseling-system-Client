@@ -76,6 +76,8 @@ public:
     Q_INVOKABLE void deleteAppointment(int appointmentId);
 
     Q_INVOKABLE void fetchAppointmentSurvey(int appointmentId);
+    
+    Q_INVOKABLE void requestModification(int appointmentId, const QString &newDate, int newSlot);
 
 signals:
     void patientListReceived(const QJsonArray &patients);

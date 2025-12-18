@@ -115,6 +115,18 @@ void DoctorController::fetchAppointmentSurvey(int appointmentId)
     sendRequest(CmdType::GET_SURVEY_CONTENT, data);
 }
 
+void DoctorController::requestModification(int appointmentId, const QString &newDate, int newSlot) {
+    if (appointmentId <= 0 || newDate.isEmpty() || newSlot < 0) {
+        emit operationResult(false, "参数无效");
+        return;
+    }
+    QJsonObject data;
+    data[JsonKeys::APPOINTMENT_ID] = appointmentId;
+    data["date"] = newDate;
+    data["timeSlot"] = newSlot;
+    sendRequest(CmdType::MODIFY_BOOKING_REQ, data);
+}
+
 void DoctorController::onResponseReceived(const QJsonObject &root)
 {
     int cmd = root[JsonKeys::CMD].toInt();
@@ -150,6 +162,13 @@ void DoctorController::onResponseReceived(const QJsonObject &root)
                     
                     item.timeSlotText = getTimeSlotText(item.timeSlot);
                     item.statusText = getStatusText(item.status);
+
+                    // 解析待变更数据
+                    if (obj.contains("pendingDate")) {
+                        item.pendingDate = obj["pendingDate"].toString();
+                        item.pendingSlot = obj["pendingSlot"].toInt();
+                    }
+
                     items.append(item);
                 }
                 m_bookingModel->updateData(items);
@@ -203,6 +222,15 @@ void DoctorController::onResponseReceived(const QJsonObject &root)
             emit operationResult(code == (int)StatusCode::SUCCESS, msg);
             break;
 
+        // 修改预约请求的回包
+        case (int) CmdType::MODIFY_BOOKING_REQ:
+            emit operationResult(code == (int) StatusCode::SUCCESS, msg);
+            
+            if (code == (int) StatusCode::SUCCESS) {
+                fetchAppointments();
+            }
+            break;
+
         case (int) CmdType::DOCTOR_DELETE_BOOKING:
             emit operationResult(code == (int)StatusCode::SUCCESS, msg);
             if (code == (int)StatusCode::SUCCESS) {
@@ -254,6 +282,7 @@ QString DoctorController::getStatusText(int status) {
         case 1: return "已确认";
         case 2: return "已完成";
         case 3: return "已取消";
+        case 4: return "待学生确认修改";
         default: return "未知状态";
     }
 }

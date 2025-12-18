@@ -29,8 +29,6 @@ qt_add_qml_module(appPsyClient
         src/controllers/SessionController.h src/controllers/SessionController.cpp
         src/controllers/StudentController.h src/controllers/StudentController.cpp
         src/models/BookingModel.h src/models/BookingModel.cpp
-        src/models/ChatModel.h src/models/ChatModel.cpp
-        src/models/DoctorListModel.h src/models/DoctorListModel.cpp
         src/network/NetworkClient.h src/network/NetworkClient.cpp
         src/network/PacketDispatcher.h src/network/PacketDispatcher.cpp
     QML_FILES

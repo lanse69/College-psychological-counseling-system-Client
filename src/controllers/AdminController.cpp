@@ -11,7 +11,7 @@ AdminController::AdminController(QObject *parent) : BaseController(parent) {
             this, &AdminController::onResponseReceived);
 }
 
-void AdminController::addUser(const QString &username, const QString &password, int role, const QString &realName, const QString &intro, const QString &spec)
+void AdminController::addUser(const QString &username, const QString &password, int role, const QString &realName, const QString &gender, const QString &intro, const QString &spec)
 {
     if (username.isEmpty() || password.isEmpty()) {
         emit operationResult(false, "用户名和密码不能为空");
@@ -25,6 +25,7 @@ void AdminController::addUser(const QString &username, const QString &password, 
     data[JsonKeys::PASSWORD] = passwordHash;
     data[JsonKeys::ROLE] = role;
     data[JsonKeys::REAL_NAME] = realName;
+    data["gender"] = gender;
 
     // 医生角色有简介和擅长领域
     if (role == (int)UserRole::DOCTOR) {
@@ -47,7 +48,7 @@ void AdminController::deleteUser(int targetId) {
     sendRequest(CmdType::ADMIN_DEL_USER, data);
 }
 
-void AdminController::updateUserInfo(int targetId, const QString &realName, const QString &password, const QString &intro, const QString &spec)
+void AdminController::updateUserInfo(int targetId, const QString &realName, const QString &gender, const QString &password, const QString &intro, const QString &spec)
 {
     if (targetId <= 0) {
         emit operationResult(false, "无效的用户 ID");
@@ -58,6 +59,8 @@ void AdminController::updateUserInfo(int targetId, const QString &realName, cons
 
     data[JsonKeys::TARGET_ID] = targetId;
     data[JsonKeys::REAL_NAME] = realName;
+    data["gender"] = gender;
+    
     if (!password.isEmpty()) {
         QString passwordHash = QString(QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256).toHex());
         data[JsonKeys::PASSWORD] = passwordHash;

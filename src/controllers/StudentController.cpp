@@ -11,6 +11,9 @@ StudentController::StudentController(QObject *parent) : BaseController(parent)
 {
     connect(&PacketDispatcher::instance(), &PacketDispatcher::onStudentResponse,
             this, &StudentController::onResponseReceived);
+
+    connect(&PacketDispatcher::instance(), &PacketDispatcher::onNotification,
+            this, &StudentController::onNotificationReceived);
 }
 
 void StudentController::fetchDoctorList()
@@ -86,6 +89,38 @@ void StudentController::cancelAppointment(int appointmentId)
     sendRequest(CmdType::STUDENT_CANCEL_APPOINTMENT, data);
 }
 
+void StudentController::modifyAppointment(int appointmentId, const QString &newDate, int newSlot)
+{
+    if (appointmentId <= 0) {
+        emit operationResult(false, "预约ID无效");
+        return;
+    }
+
+    // 校验日期格式
+    QDate qDate = QDate::fromString(newDate, Qt::ISODate);
+    if (!qDate.isValid()) {
+        qDate = QDate::fromString(newDate, "yyyy-M-d");
+    }
+    
+    if (!qDate.isValid() || qDate < QDate::currentDate()) {
+        emit operationResult(false, "日期无效或不能选择过去的时间");
+        return;
+    }
+    
+    if (newSlot < 0 || newSlot > 6) {
+        emit operationResult(false, "无效的时间段");
+        return;
+    }
+
+    QJsonObject data;
+    data[JsonKeys::APPOINTMENT_ID] = appointmentId;
+    data["date"] = qDate.toString(Qt::ISODate);
+    data["timeSlot"] = newSlot;
+
+    // 发送 MODIFY_BOOKING_DIRECT 指令
+    sendRequest(CmdType::MODIFY_BOOKING_DIRECT, data);
+}
+
 void StudentController::submitSurvey(int appointmentId, const QStringList &answers)
 {
     if (appointmentId <= 0) {
@@ -120,6 +155,13 @@ void StudentController::deleteAppointment(int appointmentId)
     QJsonObject data;
     data[JsonKeys::APPOINTMENT_ID] = appointmentId;
     sendRequest(CmdType::STUDENT_DELETE_BOOKING, data);
+}
+
+void StudentController::replyModification(int appointmentId, bool accept) {
+    QJsonObject data;
+    data[JsonKeys::APPOINTMENT_ID] = appointmentId;
+    data["accept"] = accept;
+    sendRequest(CmdType::MODIFY_BOOKING_REPLY, data);
 }
 
 void StudentController::onResponseReceived(const QJsonObject &root)
@@ -163,6 +205,17 @@ void StudentController::onResponseReceived(const QJsonObject &root)
             emit operationResult(code == (int) StatusCode::SUCCESS, msg);
             break;
 
+        case (int) CmdType::MODIFY_BOOKING_REPLY:
+            emit operationResult(code == (int) StatusCode::SUCCESS, msg);
+            if (code == (int) StatusCode::SUCCESS) {
+                fetchMySchedule(); 
+            }
+            break;
+        
+        case (int) CmdType::MODIFY_BOOKING_DIRECT: // 处理修改结果
+            emit operationResult(code == (int) StatusCode::SUCCESS, msg);
+            break;
+
         case (int) CmdType::STUDENT_GET_MY_SCHEDULE:
             if (code == (int) StatusCode::SUCCESS) {
                 QJsonArray list = root[JsonKeys::DATA].toArray();
@@ -187,5 +240,21 @@ void StudentController::onResponseReceived(const QJsonObject &root)
         default:
             qWarning() << "未处理的命令:" << cmd;
             break;
+    }
+}
+
+void StudentController::onNotificationReceived(const QJsonObject &root)
+{
+    QString action = root["action"].toString();
+    
+    // 如果收到刷新指令，自动刷新预约列表
+    if (action == "refresh_schedule") {
+        fetchMySchedule();
+        
+        // 弹窗提示学生
+        QString msg = root["msg"].toString();
+        if (!msg.isEmpty()) {
+            emit operationResult(true, msg);
+        }
     }
 }

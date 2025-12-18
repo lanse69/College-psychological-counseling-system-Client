@@ -2,26 +2,29 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import PsyClient
+import "../../components"
 
 Item {
     id: tabRoot
     property var controller: null
 
-    // 存储从后端拿到的数据: [{label: "X轴", value: 10}, ...]
     property var chartData: []
-    property string currentTitle: "每月咨询人数趋势"
+    property string currentTitle: ""
+    property string currentType: ""
 
-    Component.onCompleted: refresh()
-
-    function refresh() {
-        // 默认加载趋势图
-        fetchData("consult_trend")
+    Component.onCompleted: {
+        // 延迟一点加载，确保 controller 已就绪
+        refreshTimer.start()
     }
 
-    function fetchData(type) {
-        if (controller) controller.fetchStatistics(type)
-        if (type === "consult_trend") currentTitle = "近12个月咨询量趋势"
-        else currentTitle = "热门心理咨询问题 TOP 10"
+    Timer {
+        id: refreshTimer
+        interval: 100
+        onTriggered: fetchData("consult_trend")
+    }
+
+    function refresh() {
+        if (currentType !== "") fetchData(currentType)
     }
 
     Connections {
@@ -32,7 +35,6 @@ Item {
                 tmp.push(data[i])
             }
             tabRoot.chartData = tmp
-            canvas.requestPaint() // 触发重绘
         }
     }
 
@@ -42,25 +44,56 @@ Item {
         spacing: 20
 
         // 顶部控制栏
-        RowLayout {
+        Flow {
             Layout.fillWidth: true
-            Label { text: "数据可视化报表"; font.bold: true; font.pixelSize: 20 }
-            Item { Layout.fillWidth: true }
+            spacing: 10
+
+            Label { 
+                text: "数据可视化报表"; 
+                font.bold: true; 
+                font.pixelSize: 16 
+                color: Theme.textPrimary
+                verticalAlignment: Text.AlignVCenter
+                height: 40
+            }
             
             ButtonGroup { id: chartGroup }
             
             Button {
-                text: "咨询趋势图"
+                text: "咨询趋势"
                 checkable: true
                 checked: true
                 ButtonGroup.group: chartGroup
                 onClicked: fetchData("consult_trend")
             }
             Button {
-                text: "热门问题分布"
+                text: "热门问题"
                 checkable: true
                 ButtonGroup.group: chartGroup
                 onClicked: fetchData("common_issues")
+            }
+            Button {
+                text: "学生性别"
+                checkable: true
+                ButtonGroup.group: chartGroup
+                onClicked: fetchData("student_gender")
+            }
+            Button {
+                text: "热门医生"
+                checkable: true
+                ButtonGroup.group: chartGroup
+                onClicked: fetchData("top_doctors")
+            }
+            Button {
+                text: "时段热力"
+                checkable: true
+                ButtonGroup.group: chartGroup
+                onClicked: fetchData("peak_times")
+            }
+            // TODO: 其他
+            Button {
+                text: "刷新"
+                onClicked: refresh()
             }
         }
 
@@ -75,76 +108,52 @@ Item {
             ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: 20
+                spacing: 10
                 
                 Label { 
                     text: currentTitle
                     font.bold: true
+                    font.pixelSize: 16
                     color: Theme.textPrimary
                     Layout.alignment: Qt.AlignHCenter
                 }
 
-                Canvas {
-                    id: canvas
+                CChart {
+                    id: chart
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     
-                    onPaint: {
-                        var ctx = getContext("2d");
-                        var w = width;
-                        var h = height;
-
-                        // 清空背景
-                        ctx.clearRect(0, 0, w, h);
-                        
-                        var data = tabRoot.chartData;
-                        if (data.length === 0) {
-                            ctx.fillStyle = "#888";
-                            ctx.font = "16px sans-serif";
-                            ctx.fillText("暂无数据", w/2 - 30, h/2);
-                            return;
-                        }
-
-                        // 计算最大值用于归一化高度
-                        var maxVal = 0;
-                        for(var i=0; i<data.length; i++) if(data[i].value > maxVal) maxVal = data[i].value;
-                        if(maxVal === 0) maxVal = 10;
-
-                        // 绘图参数
-                        var padding = 40;
-                        var drawW = w - padding * 2;
-                        var drawH = h - padding * 2;
-                        var barWidth = drawW / data.length * 0.6;
-                        var gap = drawW / data.length;
-
-                        // 绘制坐标轴
-                        ctx.strokeStyle = Theme.divider;
-                        ctx.beginPath();
-                        ctx.moveTo(padding, padding);
-                        ctx.lineTo(padding, h - padding); // Y轴
-                        ctx.lineTo(w - padding, h - padding); // X轴
-                        ctx.stroke();
-
-                        // 绘制柱状图
-                        for(var j=0; j<data.length; j++) {
-                            var item = data[j];
-                            var barH = (item.value / maxVal) * drawH;
-                            
-                            var x = padding + j * gap + (gap - barWidth)/2;
-                            var y = h - padding - barH;
-
-                            // 柱子
-                            ctx.fillStyle = Theme.primary;
-                            ctx.fillRect(x, y, barWidth, barH);
-
-                            // 数值
-                            ctx.fillStyle = Theme.textPrimary;
-                            ctx.font = "12px sans-serif";
-                            ctx.fillText(item.value, x + barWidth/2 - 5, y - 5);
-                            ctx.fillText(item.label, x, h - padding + 15);
-                        }
-                    }
+                    chartData: tabRoot.chartData
+                    
+                    barColor: getBarColor(tabRoot.currentType)
                 }
             }
+        }
+    }
+
+    function getBarColor(type) {
+        if (type === "consult_trend") return Theme.primary;
+        if (type === "common_issues") return Theme.warning;
+        if (type === "student_gender") return Theme.purple;
+        if (type === "top_doctors") return Theme.success;
+        if (type === "peak_times") return Theme.orange;
+        // TODO: 其他
+        return Theme.primary;
+    }
+
+    function fetchData(type) {
+        currentType = type
+        if (controller) controller.fetchStatistics(type)
+        
+        // 更新标题逻辑
+        switch(type) {
+            case "consult_trend": currentTitle = "近12个月完成的咨询数量趋势"; break;
+            case "common_issues": currentTitle = "Top 10 热门心理咨询标签/问题"; break;
+            case "student_gender": currentTitle = "注册学生性别比例分布"; break;
+            case "top_doctors": currentTitle = "最受欢迎心理咨询师 (Top 10)"; break;
+            case "peak_times": currentTitle = "预约时段热力分布 (0-6)"; break;
+            // TODO: 其他
+            default: currentTitle = "未知";break;
         }
     }
 }

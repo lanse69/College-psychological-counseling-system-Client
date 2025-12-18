@@ -50,7 +50,7 @@ Page {
             Layout.fillWidth: true
             TextField {
                 id: ipField
-                text: "10.252.38.254"
+                text: "10.253.135.196"
                 placeholderText: "服务端 IP 地址"
                 Layout.fillWidth: true
                 color: Theme.textPrimary

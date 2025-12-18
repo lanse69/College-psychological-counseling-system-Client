@@ -163,6 +163,17 @@ Item {
                             }
                         }
 
+                        Button {
+                            text: "改期"
+                            visible: model.status === 0 || model.status === 1
+                            onClicked: {
+                                modifyDialog.targetId = model.id
+                                modifyDialog.selectedDate = model.appointmentDate
+                                modifyDialog.selectedSlot = model.timeSlot
+                                modifyDialog.open()
+                            }
+                        }
+
                         // 删除记录按钮
                         Button {
                             text: "删除记录"
@@ -204,10 +215,26 @@ Item {
         id: confirmDeleteDialog
         property int targetId: 0
         title: "确认删除"
+        width: 300
+        implicitWidth: 300
         anchors.centerIn: parent
         standardButtons: Dialog.Yes | Dialog.No
         
-        Text { text: "确定要移除这条已取消的记录吗？"; color: Theme.textPrimary }
+        background: Rectangle {
+            color: Theme.surface
+            border.color: Theme.border
+            radius: 8
+            implicitWidth: 300
+        }
+
+        contentItem: Text { 
+            text: "确定要移除这条已取消的记录吗？"
+            color: Theme.textPrimary 
+            font.pixelSize: 16
+            padding: 20
+            wrapMode: Text.Wrap
+            width: parent.width
+        }
         
         onAccepted: {
             controller.deleteAppointment(confirmDeleteDialog.targetId)
@@ -287,6 +314,154 @@ Item {
                         Layout.alignment: Qt.AlignHCenter
                     }
                 }
+            }
+        }
+    }
+
+    Dialog {
+        id: modifyDialog
+        title: "协商修改预约时间"
+        width: 450
+        implicitWidth: 450
+        anchors.centerIn: parent
+        modal: true
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        property int targetId: 0
+        property string selectedDate: ""
+        property int selectedSlot: -1
+
+        // 每次打开弹窗时重置状态
+        onOpened: {
+            slotGroup.checkState = Qt.Unchecked 
+            modifyDialog.selectedSlot = -1
+        }
+
+        background: Rectangle {
+            color: Theme.surface
+            radius: 8
+            border.color: Theme.border
+            implicitWidth: 450
+        }
+
+        contentItem: ColumnLayout {
+            width: parent.width 
+            spacing: 20
+            Label { 
+                text: "请选择新的日期和时间"
+                color: Theme.textSecondary
+                font.bold: true
+                font.pixelSize: 16
+                Layout.alignment: Qt.AlignHCenter
+            }
+            
+            // 日期输入
+            ColumnLayout {
+                spacing: 5
+                Layout.fillWidth: true
+                Label { text: "日期 (YYYY-MM-DD):"; color: Theme.textSecondary }
+                TextField {
+                    id: dateField
+                    Layout.fillWidth: true
+                    placeholderText: "例如: 2025-05-20"
+                    text: Qt.formatDate(new Date(), "yyyy-MM-dd") // 默认今天
+                    color: Theme.textPrimary
+                    background: Rectangle {
+                        color: Theme.inputBackground
+                        border.color: Theme.border
+                        radius: 4
+                    }
+                    // 实时绑定到 property
+                    onTextEdited: modifyDialog.selectedDate = text
+                    Component.onCompleted: modifyDialog.selectedDate = text
+                }
+            }
+
+            // 时间段选择
+            ColumnLayout {
+                spacing: 5
+                Layout.fillWidth: true
+                Label { text: "时间段:"; color: Theme.textSecondary }
+
+                // ButtonGroup 管理互斥状态
+                ButtonGroup {
+                    id: slotGroup
+                    // 当组内选中的按钮改变时，更新 selectedSlot
+                    onCheckedButtonChanged: {
+                        if (checkedButton) {
+                            modifyDialog.selectedSlot = checkedButton.slotIndex
+                        } else {
+                            modifyDialog.selectedSlot = -1
+                        }
+                    }
+                }
+
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 10
+                    
+                    Repeater {
+                        model: ["08:30-09:30", "09:30-10:30", "10:30-11:30", 
+                                "14:30-15:30", "15:30-16:30", "16:30-17:30", "17:30-18:30"]
+                        
+                        delegate: Button {
+                            text: modelData
+                            checkable: true
+                            // 绑定到 ButtonGroup
+                            ButtonGroup.group: slotGroup
+                            
+                            // 自定义属性存储索引
+                            property int slotIndex: index
+                            
+                            // 选中时变色
+                            highlighted: checked
+                            
+                            // 确保打开弹窗时状态正确 (如果 selectedSlot 为 -1，则不选中)
+                            checked: modifyDialog.selectedSlot === index
+                            
+                            contentItem: Text {
+                                text: parent.text
+                                color: parent.checked ? Theme.textInverted : Theme.textPrimary
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            background: Rectangle {
+                                color: parent.checked ? Theme.primary : "transparent"
+                                border.color: parent.checked ? Theme.primary : Theme.border
+                                radius: 4
+                            }
+                        }
+                    }
+                }
+            }
+
+            Label {
+                text: "提交后将发送请求给学生，需学生确认后生效。"
+                color: Theme.warning
+                font.pixelSize: 12
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
+        }
+        
+        onAccepted: {
+            // 校验逻辑
+            if (targetId === 0) {
+                appWindow.showToast("未选中预约记录", true)
+                return
+            }
+            if (selectedDate.length < 8) {
+                appWindow.showToast("日期格式不正确", true)
+                return
+            }
+            if (selectedSlot === -1) {
+                appWindow.showToast("请选择一个时间段", true)
+                return
+            }
+
+            // 发起请求
+            if (controller) {
+                controller.requestModification(targetId, selectedDate, selectedSlot)
             }
         }
     }

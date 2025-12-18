@@ -38,6 +38,8 @@ QtObject {
 
     property color primary: isDark ? "#64b5f6" : "#2196F3"
     property color primaryHover: isDark ? "#42a5f5" : "#1976d2"
+    property color purple: isDark ? "#9c27b0": "#6a1c78ff"
+    property color orange: isDark ? "#ff5722": "#d14e26ff"
     
     property color success: isDark ? "#81c784" : "#4CAF50"
     property color warning: isDark ? "#ffd54f" : "#FFC107"

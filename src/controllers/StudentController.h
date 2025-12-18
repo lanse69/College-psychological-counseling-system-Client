@@ -40,6 +40,14 @@ public:
      */
     Q_INVOKABLE void cancelAppointment(int appointmentId);
 
+    /**
+     * @brief 修改预约 (直接修改，无需医生确认)
+     * @param appointmentId 预约ID
+     * @param newDate 新日期 (YYYY-MM-DD)
+     * @param newSlot 新时间段索引
+     */
+    Q_INVOKABLE void modifyAppointment(int appointmentId, const QString &newDate, int newSlot);
+
     // 删除预约记录
     Q_INVOKABLE void deleteAppointment(int appointmentId);
 
@@ -53,6 +61,8 @@ public:
      */
     Q_INVOKABLE void fetchSurveyContent(int appointmentId);
 
+    Q_INVOKABLE void replyModification(int appointmentId, bool accept);
+
 signals:
     void doctorListReceived(const QJsonArray &doctors);
     void doctorDetailReceived(const QJsonObject &doctor);
@@ -61,4 +71,5 @@ signals:
 
 private slots:
     void onResponseReceived(const QJsonObject &data);
+    void onNotificationReceived(const QJsonObject &data);
 };

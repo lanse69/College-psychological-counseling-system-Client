@@ -15,6 +15,8 @@ struct BookingItem {
     QString reason;
     QString timeSlotText; 
     QString statusText;
+    QString pendingDate;
+    int pendingSlot = -1;
 };
 
 class BookingModel : public QAbstractListModel
@@ -30,7 +32,9 @@ public:
         TimeSlotTextRole,
         StatusRole,
         StatusTextRole,
-        ReasonRole
+        ReasonRole,
+        PendingDateRole = Qt::UserRole + 10,
+        PendingSlotRole
     };
 
     explicit BookingModel(QObject *parent = nullptr);

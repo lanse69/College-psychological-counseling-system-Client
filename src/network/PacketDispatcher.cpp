@@ -65,6 +65,8 @@ void PacketDispatcher::dispatch(const QJsonObject &data)
         case CmdType::DOCTOR_GET_PATIENT_HISTORY:
         case CmdType::DOCTOR_GET_MY_SURVEY:
         case CmdType::DOCTOR_SAVE_SURVEY:
+        case CmdType::DOCTOR_DELETE_BOOKING:
+        case CmdType::MODIFY_BOOKING_REQ:
             emit onDoctorResponse(data);
             break;
 
@@ -78,6 +80,7 @@ void PacketDispatcher::dispatch(const QJsonObject &data)
         case CmdType::STUDENT_CANCEL_APPOINTMENT:
         case CmdType::STUDENT_DELETE_BOOKING:
         case CmdType::STUDENT_SUBMIT_SURVEY:
+        case CmdType::MODIFY_BOOKING_REPLY:
             emit onStudentResponse(data);
             break;
 

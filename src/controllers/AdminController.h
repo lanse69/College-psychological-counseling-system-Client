@@ -18,9 +18,7 @@ public:
      * @brief 添加用户
      * @param role 1=Student, 2=Doctor
      */
-    Q_INVOKABLE void addUser(const QString &username, const QString &password,
-                             int role, const QString &realName,
-                             const QString &intro, const QString &spec);
+    Q_INVOKABLE void addUser(const QString &username, const QString &password, int role, const QString &realName, const QString &gender, const QString &intro, const QString &spec);
 
     /**
      * @brief 删除用户
@@ -31,8 +29,7 @@ public:
      * @brief 修改用户信息 (管理员权限)
      * @param password 若为空字符串，则不修改密码
      */
-    Q_INVOKABLE void updateUserInfo(int targetId, const QString &realName, const QString &password,
-                                    const QString &intro, const QString &spec);
+    Q_INVOKABLE void updateUserInfo(int targetId, const QString &realName, const QString &gender, const QString &password, const QString &intro, const QString &spec);
 
     /**
      * @brief 获取用户列表

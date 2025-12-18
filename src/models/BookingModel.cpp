@@ -17,16 +17,18 @@ QVariant BookingModel::data(const QModelIndex &index, int role) const
     const BookingItem &item = m_displayItems[index.row()];
 
     switch (role) {
-    case IdRole: return item.id;
-    case StudentIdRole: return item.studentId;
-    case StudentNameRole: return item.studentName;
-    case DateRole: return item.appointmentDate;
-    case TimeSlotRole: return item.timeSlot;
-    case TimeSlotTextRole: return item.timeSlotText;
-    case StatusRole: return item.status;
-    case StatusTextRole: return item.statusText;
-    case ReasonRole: return item.reason;
-    default: return QVariant();
+        case IdRole: return item.id;
+        case StudentIdRole: return item.studentId;
+        case StudentNameRole: return item.studentName;
+        case DateRole: return item.appointmentDate;
+        case TimeSlotRole: return item.timeSlot;
+        case TimeSlotTextRole: return item.timeSlotText;
+        case StatusRole: return item.status;
+        case StatusTextRole: return item.statusText;
+        case ReasonRole: return item.reason;
+        case PendingDateRole: return item.pendingDate;
+        case PendingSlotRole: return item.pendingSlot;
+        default: return QVariant();
     }
 }
 
@@ -42,6 +44,8 @@ QHash<int, QByteArray> BookingModel::roleNames() const
     roles[StatusRole] = "status";
     roles[StatusTextRole] = "statusText";
     roles[ReasonRole] = "reason";
+    roles[PendingDateRole] = "pendingDate";
+    roles[PendingSlotRole] = "pendingSlot";
     return roles;
 }
 

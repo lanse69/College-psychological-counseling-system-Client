@@ -107,10 +107,18 @@ Item {
                                     color: Theme.textPrimary
                                     font.bold: true
                                 }
-                                Text { 
-                                    text: model.username
-                                    color: Theme.textSecondary
-                                    font.pixelSize: 12 
+                                Row {
+                                    spacing: 5
+                                    Text { 
+                                        text: model.gender ? model.gender : "未设置"
+                                        color: Theme.textSecondary
+                                        font.pixelSize: 12
+                                    }
+                                    Text { 
+                                        text: " | " + model.username
+                                        color: Theme.textSecondary
+                                        font.pixelSize: 12 
+                                    }
                                 }
                             }
                         }
@@ -176,6 +184,38 @@ Item {
                         id: nameField
                         Layout.fillWidth: true
                         placeholderText: "用户真实姓名"
+                    }
+
+                    // 性别选择
+                    Label { text: "性别"; color: Theme.textPrimary }
+                    RowLayout {
+                        spacing: 20
+                        RadioButton {
+                            id: maleRadio
+                            text: "男"
+                            checked: true
+                            
+                            contentItem: Text {
+                                text: parent.text
+                                font: parent.font
+                                color: Theme.textPrimary
+                                verticalAlignment: Text.AlignVCenter
+                                leftPadding: parent.indicator.width + parent.spacing
+                            }
+                        }
+                        
+                        RadioButton {
+                            id: femaleRadio
+                            text: "女"
+                            
+                            contentItem: Text {
+                                text: parent.text
+                                font: parent.font
+                                color: Theme.textPrimary
+                                verticalAlignment: Text.AlignVCenter
+                                leftPadding: parent.indicator.width + parent.spacing
+                            }
+                        }
                     }
 
                     // 密码
@@ -262,6 +302,7 @@ Item {
         specField.text = ""
         introField.text = ""
         roleCombo.currentIndex = 0
+        maleRadio.checked = true
     }
 
     function switchToEditMode(userData) {
@@ -271,6 +312,11 @@ Item {
         userField.text = userData.username
         nameField.text = userData.realName
         passField.text = "" // 密码不回显
+        if (userData.gender === "女") {
+            femaleRadio.checked = true
+        } else {
+            maleRadio.checked = true
+        }
         
         // 角色映射: role 1->index 0, 2->1, 3->2
         var r = userData.role
@@ -285,17 +331,18 @@ Item {
         }
 
         var role = roleCombo.currentIndex + 1 // 1:Student, 2:Doctor
+        var genderStr = maleRadio.checked ? "男" : "女"
 
         if (isEditMode) {
             // 更新
-            controller.updateUserInfo(currentUserId, nameField.text, passField.text, introField.text, specField.text)
+            controller.updateUserInfo(currentUserId, nameField.text, genderStr, passField.text, introField.text, specField.text)
         } else {
             // 新增
             if (passField.text === "") {
                 appWindow.showToast("创建用户必须设置初始密码", true)
                 return
             }
-            controller.addUser(userField.text, passField.text, role, nameField.text, introField.text, specField.text)
+            controller.addUser(userField.text, passField.text, role, nameField.text, genderStr, introField.text, specField.text)
         }
     }
     
