@@ -60,6 +60,8 @@ Page {
                     radius: 4
                     border.color: Theme.border
                 }
+                onAccepted: userField.forceActiveFocus()
+                Keys.onDownPressed: userField.forceActiveFocus()
             }
             Button {
                 text: sessionCtrl.isConnected ? "已连接至服务器" : "未连接服务器"
@@ -91,6 +93,8 @@ Page {
                 border.color: Theme.border
             }
             onAccepted: passField.forceActiveFocus()
+            Keys.onUpPressed: ipField.forceActiveFocus()
+            Keys.onDownPressed: passField.forceActiveFocus()
         }
 
         // 密码输入框
@@ -114,6 +118,7 @@ Page {
                     statusLabel.text = "请先连接服务器"
                 }
             }
+            Keys.onUpPressed: userField.forceActiveFocus()
         }
 
         Button {

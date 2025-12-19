@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import PsyClient
+import "../../components"
 
 Item {
     id: tabRoot
@@ -31,13 +32,21 @@ Item {
         if (controller) controller.fetchAppointments()
     }
 
+    function updateList() {
+        if (controller && controller.appointmentModel) {
+            var status = filterCombo.currentText === "全部状态" ? "全部" : filterCombo.currentText
+            var keyword = searchField.text
+            controller.appointmentModel.applyFilter(status, keyword)
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 15
         spacing: 10
 
         RowLayout {
-            Label { text: "预约申请列表"; font.bold: true; font.pixelSize: 20 }
+            Label { text: "预约列表"; font.bold: true; font.pixelSize: 20 }
             Item { Layout.fillWidth: true }
             Button { text: "刷新列表"; onClicked: refresh() }
         }
@@ -47,9 +56,30 @@ Item {
             id: filterCombo
             Layout.fillWidth: true
             model: ["全部状态", "待确认", "已确认", "已完成", "已取消"]
-            onActivated: {
-                if (controller && controller.appointmentModel) {
-                    controller.appointmentModel.applyFilter(currentText === "全部状态" ? "全部" : currentText)
+            onActivated: updateList()
+        }
+
+        // 搜索框
+        TextField {
+            id: searchField
+            Layout.fillWidth: true
+            placeholderText: "搜索学生姓名..."
+            
+            // 监听输入变化，实时搜索
+            onTextChanged: updateList()
+            
+            // 清除按钮
+            rightPadding: 30
+            Image {
+                // source: "qrc:/assets/icons/close.png"
+                Text {text: "X"}
+                visible: parent.text.length > 0
+                anchors.right: parent.right
+                anchors.rightMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: searchField.text = ""
                 }
             }
         }
@@ -320,7 +350,7 @@ Item {
 
     Dialog {
         id: modifyDialog
-        title: "协商修改预约时间"
+        title: "修改预约时间"
         width: 450
         implicitWidth: 450
         anchors.centerIn: parent
@@ -330,6 +360,15 @@ Item {
         property int targetId: 0
         property string selectedDate: ""
         property int selectedSlot: -1
+
+        // 内部日历实例
+        CCalendar {
+            id: docCalendar
+            onDateSelected: function(str) {
+                modifyDialog.selectedDate = str
+                dateField.text = str
+            }
+        }
 
         // 每次打开弹窗时重置状态
         onOpened: {
@@ -354,26 +393,36 @@ Item {
                 font.pixelSize: 16
                 Layout.alignment: Qt.AlignHCenter
             }
-            
+
             // 日期输入
             ColumnLayout {
                 spacing: 5
                 Layout.fillWidth: true
                 Label { text: "日期 (YYYY-MM-DD):"; color: Theme.textSecondary }
-                TextField {
-                    id: dateField
+                
+                RowLayout {
                     Layout.fillWidth: true
-                    placeholderText: "例如: 2025-05-20"
-                    text: Qt.formatDate(new Date(), "yyyy-MM-dd") // 默认今天
-                    color: Theme.textPrimary
-                    background: Rectangle {
-                        color: Theme.inputBackground
-                        border.color: Theme.border
-                        radius: 4
+                    
+                    TextField {
+                        id: dateField
+                        Layout.fillWidth: true
+                        placeholderText: "例如: 2025-05-20"
+                        text: Qt.formatDate(new Date(), "yyyy-MM-dd") // 默认今天
+                        color: Theme.textPrimary
+                        background: Rectangle {
+                            color: Theme.inputBackground
+                            border.color: Theme.border
+                            radius: 4
+                        }
+                        // 实时绑定到 property
+                        onTextEdited: modifyDialog.selectedDate = text
+                        Component.onCompleted: modifyDialog.selectedDate = text
                     }
-                    // 实时绑定到 property
-                    onTextEdited: modifyDialog.selectedDate = text
-                    Component.onCompleted: modifyDialog.selectedDate = text
+                    
+                    Button {
+                        text: "H"
+                        onClicked: docCalendar.open()
+                    }
                 }
             }
 

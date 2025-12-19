@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import PsyClient
+import "../../components"
 
 Item {
     id: tabRoot
@@ -265,6 +266,13 @@ Item {
         property string selectedDate: ""
         property int selectedSlot: -1
 
+        CCalendar {
+            id: internalCalendar
+            onDateSelected: function(str) {
+                modifyDialog.selectedDate = str
+            }
+        }
+
         background: Rectangle {
             color: Theme.surface
             radius: 5
@@ -278,19 +286,34 @@ Item {
                 color: Theme.textSecondary
             }
             
-            TextField {
-                id: dateField
-                text: modifyDialog.selectedDate
-                placeholderText: "YYYY-MM-DD"
+            RowLayout {
                 Layout.fillWidth: true
-                color: Theme.textPrimary
-                placeholderTextColor: Theme.textPlaceholder
-                background: Rectangle {
-                    color: Theme.inputBackground
-                    border.color: Theme.border
-                    radius: 4
+                TextField {
+                    id: dateField
+                    text: modifyDialog.selectedDate
+                    placeholderText: "YYYY-MM-DD"
+                    Layout.fillWidth: true
+                    color: Theme.textPrimary
+                    placeholderTextColor: Theme.textPlaceholder
+                    background: Rectangle {
+                        color: Theme.inputBackground
+                        border.color: Theme.border
+                        radius: 4
+                    }
+                    onTextEdited: modifyDialog.selectedDate = text
                 }
-                onTextEdited: modifyDialog.selectedDate = text
+                Button {
+                    text: "H"
+                    onClicked: internalCalendar.open()
+                }
+            }
+            
+            // 当日历选中时更新 TextField
+            Connections {
+                target: internalCalendar
+                function onDateSelected(str) {
+                    dateField.text = str
+                }
             }
 
             Label { 

@@ -1,6 +1,6 @@
 #include "BookingModel.h"
 
-BookingModel::BookingModel(QObject *parent) : QAbstractListModel(parent), m_currentFilter{"全部"}
+BookingModel::BookingModel(QObject *parent) : QAbstractListModel(parent), m_currentStatusFilter{"全部"}, m_currentSearchFilter("")
 {}
 
 int BookingModel::rowCount(const QModelIndex &parent) const
@@ -52,28 +52,44 @@ QHash<int, QByteArray> BookingModel::roleNames() const
 void BookingModel::updateData(const QVector<BookingItem> &newItems)
 {
     m_allItems = newItems;
-    
-    applyFilter(m_currentFilter);
+    applyFilter(m_currentStatusFilter, m_currentSearchFilter);
 }
 
-void BookingModel::applyFilter(const QString &statusFilter)
+void BookingModel::applyFilter(const QString &statusFilter, const QString &searchFilter)
 {
-    m_currentFilter = statusFilter;
+    m_currentStatusFilter = statusFilter;
+    m_currentSearchFilter = searchFilter;
+
     beginResetModel();
     m_displayItems.clear();
-    if (statusFilter == "全部" || statusFilter.isEmpty()) {
-        m_displayItems = m_allItems; 
-    } else {
-        int targetStatus = -1;
-        if (statusFilter == "待确认") targetStatus = 0;
-        else if (statusFilter == "已确认") targetStatus = 1;
-        else if (statusFilter == "已完成") targetStatus = 2;
-        else if (statusFilter == "已取消") targetStatus = 3;
 
-        for (const auto &item : m_allItems) {
-            if (item.status == targetStatus) {
-                m_displayItems.append(item);
+    for (const auto &item : m_allItems) {
+        // 状态过滤
+        bool statusMatch = false;
+        if (statusFilter == "全部" || statusFilter.isEmpty()) {
+            statusMatch = true;
+        } else {
+            int targetStatus = -1;
+            if (statusFilter == "待确认") targetStatus = 0;
+            else if (statusFilter == "已确认") targetStatus = 1;
+            else if (statusFilter == "已完成") targetStatus = 2;
+            else if (statusFilter == "已取消") targetStatus = 3;
+            
+            if (item.status == targetStatus) statusMatch = true;
+        }
+
+        // 本搜索过滤 (匹配学生姓名)
+        bool searchMatch = true;
+        if (!searchFilter.isEmpty()) {
+            // CaseInsensitive: 不区分大小写
+            if (!item.studentName.contains(searchFilter, Qt::CaseInsensitive)) {
+                searchMatch = false;
             }
+        }
+
+        // 同时满足才加入列表
+        if (statusMatch && searchMatch) {
+            m_displayItems.append(item);
         }
     }
     endResetModel();

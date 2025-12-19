@@ -51,10 +51,14 @@ void PacketDispatcher::dispatch(const QJsonObject &data)
             emit onAdminResponse(data);
             break;
 
+        case CmdType::GET_DOCTOR_SCHEDULE:
+            emit onDoctorResponse(data);
+            emit onStudentResponse(data);
+            break;
+
         // 医生业务
         case CmdType::GET_DOCTOR_LIST:
         case CmdType::GET_DOCTOR_DETAIL:
-        case CmdType::GET_DOCTOR_SCHEDULE:
         case CmdType::UPDATE_SCHEDULE:
         case CmdType::DOCTOR_GET_APPOINTMENTS:
         case CmdType::DOCTOR_GET_PATIENTS:

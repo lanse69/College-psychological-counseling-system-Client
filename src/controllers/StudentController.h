@@ -63,11 +63,16 @@ public:
 
     Q_INVOKABLE void replyModification(int appointmentId, bool accept);
 
+    // 获取指定医生的排班表 (用于预约时查看忙闲)
+    Q_INVOKABLE void fetchDoctorSchedule(int doctorId, int year, int month);
+
 signals:
     void doctorListReceived(const QJsonArray &doctors);
     void doctorDetailReceived(const QJsonObject &doctor);
     void scheduleReceived(const QJsonArray &schedule);
     void surveyContentReceived(const QJsonObject &surveyData);
+    // 排班数据信号
+    void scheduleMaskReceived(const QJsonObject &scheduleMap);
 
 private slots:
     void onResponseReceived(const QJsonObject &data);

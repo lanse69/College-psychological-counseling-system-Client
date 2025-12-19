@@ -72,12 +72,17 @@ Item {
                 id: nameField
                 placeholderText: "真实姓名"
                 Layout.fillWidth: true
+                onAccepted: specField.forceActiveFocus()
+                Keys.onDownPressed: specField.forceActiveFocus()
             }
 
             TextField {
                 id: specField
                 placeholderText: "擅长领域 (如: 抑郁症, 焦虑, 学业压力)"
                 Layout.fillWidth: true
+                onAccepted: introField.forceActiveFocus()
+                Keys.onUpPressed: nameField.forceActiveFocus()
+                Keys.onDownPressed: introField.forceActiveFocus()
             }
 
             TextArea {
@@ -87,6 +92,9 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 100
                 background: Rectangle { border.color: Theme.divider; radius: 4 }
+                KeyNavigation.priority: KeyNavigation.BeforeItem
+                KeyNavigation.tab: passField
+                KeyNavigation.backtab: specField
             }
 
             TextField {
@@ -94,12 +102,18 @@ Item {
                 placeholderText: "新密码 (留空则不修改)"
                 echoMode: TextInput.Password
                 Layout.fillWidth: true
+                onAccepted: saveBtn.clicked()
+                Keys.onUpPressed: introField.forceActiveFocus()
+                Keys.onDownPressed: saveBtn.forceActiveFocus()
             }
 
             Button {
+                id: saveBtn
                 text: "保存个人信息"
                 Layout.fillWidth: true
                 Layout.preferredHeight: 45
+                Keys.onReturnPressed: clicked()
+                Keys.onEnterPressed: clicked()
                 onClicked: {
                     controller.updateMyProfile(nameField.text, passField.text, introField.text, specField.text)
                 }

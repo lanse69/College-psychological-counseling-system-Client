@@ -56,6 +56,8 @@ Page {
                 placeholderText: "描述预约学生的主要诉求、症状表现..."
                 color: Theme.textSecondary
                 background: Rectangle { border.color: Theme.border; radius: 4 }
+                activeFocusOnTab: true
+                KeyNavigation.tab: processArea
             }
 
             Label { text: "2. 咨询过程摘要" }
@@ -65,6 +67,9 @@ Page {
                 placeholderText: "使用了什么疗法，互动情况如何..."
                 color: Theme.textSecondary
                 background: Rectangle { border.color: Theme.border; radius: 4 }
+                activeFocusOnTab: true
+                KeyNavigation.tab: suggestArea
+                KeyNavigation.backtab: problemArea
             }
 
             Label { text: "3. 评估与建议" }
@@ -74,6 +79,9 @@ Page {
                 placeholderText: "专业评估结论及后续建议..."
                 color: Theme.textSecondary
                 background: Rectangle { border.color: Theme.border; radius: 4 }
+                activeFocusOnTab: true
+                KeyNavigation.tab: tagsField
+                KeyNavigation.backtab: processArea
             }
             
             Label { text: "4. 结果标签 (用于统计, 逗号分隔)" }
@@ -81,6 +89,9 @@ Page {
                 id: tagsField
                 Layout.fillWidth: true
                 placeholderText: "例如: 学业压力, 人际关系, 轻度焦虑"
+                onAccepted: submitBtn.clicked()
+                Keys.onUpPressed: suggestArea.forceActiveFocus()
+                Keys.onDownPressed: submitBtn.forceActiveFocus()
             }
 
             Button {
@@ -89,6 +100,9 @@ Page {
                 Layout.preferredHeight: 50
                 Layout.topMargin: 20
                 highlighted: true
+
+                Keys.onReturnPressed: clicked()
+                Keys.onEnterPressed: clicked()
                 
                 onClicked: {
                     if (problemArea.text === "") {

@@ -2,10 +2,30 @@
 
 #include <QDebug>
 #include <QDate>
+#include <QDateTime> 
 
 #include "network/NetworkClient.h"
 #include "network/PacketDispatcher.h"
 #include "config/ProtocolDefs.h"
+
+static bool isTimePassed(const QString &dateStr, int slot) {
+    QDate date = QDate::fromString(dateStr, Qt::ISODate);
+    if (!date.isValid()) date = QDate::fromString(dateStr, "yyyy-M-d"); 
+    if (!date.isValid()) return true;
+
+    QDateTime now = QDateTime::currentDateTime();
+    if (date < now.date()) return true;
+    if (date > now.date()) return false;
+
+    // 今天：判断时间
+    int h = 0;
+    switch(slot) {
+        case 0: h = 8; break; case 1: h = 9; break; case 2: h = 10; break;
+        case 3: h = 14; break; case 4: h = 15; break; case 5: h = 16; break; case 6: h = 17; break;
+        default: return true;
+    }
+    return now.time() >= QTime(h, 30);
+}
 
 StudentController::StudentController(QObject *parent) : BaseController(parent)
 {
@@ -61,6 +81,12 @@ void StudentController::bookAppointment(int doctorId, const QString &date, int t
         return;
     }
 
+    // 检查时间段
+    if (isTimePassed(date, timeSlot)) {
+        emit operationResult(false, "该时间段已过，请选择未来的时间");
+        return;
+    }
+
     // 转换为标准 ISO 字符串
     QString standardDate = qDate.toString(Qt::ISODate);
     
@@ -109,6 +135,12 @@ void StudentController::modifyAppointment(int appointmentId, const QString &newD
     
     if (newSlot < 0 || newSlot > 6) {
         emit operationResult(false, "无效的时间段");
+        return;
+    }
+
+    // 检查时间段
+    if (isTimePassed(newDate, newSlot)) {
+        emit operationResult(false, "不能修改到已经过去的时间");
         return;
     }
 
@@ -164,6 +196,18 @@ void StudentController::replyModification(int appointmentId, bool accept) {
     sendRequest(CmdType::MODIFY_BOOKING_REPLY, data);
 }
 
+void StudentController::fetchDoctorSchedule(int doctorId, int year, int month)
+{
+    if (doctorId <= 0) return;
+    
+    QJsonObject data;
+    data["doctorId"] = doctorId;
+    data["year"] = year;
+    data["month"] = month;
+    
+    sendRequest(CmdType::GET_DOCTOR_SCHEDULE, data);
+}
+
 void StudentController::onResponseReceived(const QJsonObject &root)
 {
     int cmd = root[JsonKeys::CMD].toInt();
@@ -209,6 +253,12 @@ void StudentController::onResponseReceived(const QJsonObject &root)
             emit operationResult(code == (int) StatusCode::SUCCESS, msg);
             if (code == (int) StatusCode::SUCCESS) {
                 fetchMySchedule(); 
+            }
+            break;
+
+        case (int) CmdType::GET_DOCTOR_SCHEDULE:
+            if (code == (int) StatusCode::SUCCESS) {
+                emit scheduleMaskReceived(root[JsonKeys::DATA].toObject());
             }
             break;
         

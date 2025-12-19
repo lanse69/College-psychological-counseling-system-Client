@@ -176,6 +176,8 @@ Item {
                         readOnly: isEditMode
                         color: readOnly ? Theme.textPrimary : Theme.textSecondary
                         background: Rectangle { color: parent.readOnly ? Theme.background : Theme.inputBackground; border.color: Theme.border }
+                        onAccepted: nameField.forceActiveFocus()
+                        Keys.onDownPressed: nameField.forceActiveFocus()
                     }
 
                     // 真实姓名
@@ -184,6 +186,9 @@ Item {
                         id: nameField
                         Layout.fillWidth: true
                         placeholderText: "用户真实姓名"
+                        onAccepted: passField.forceActiveFocus()
+                        Keys.onUpPressed: userField.forceActiveFocus()
+                        Keys.onDownPressed: passField.forceActiveFocus()
                     }
 
                     // 性别选择
@@ -225,6 +230,14 @@ Item {
                         Layout.fillWidth: true
                         echoMode: TextInput.Password
                         placeholderText: isEditMode ? "******" : "必填"
+                        onAccepted: {
+                            if (roleCombo.currentIndex === 1) specField.forceActiveFocus() // 是医生 -> 去擅长领域
+                            else submitForm() // 不是医生 -> 直接提交
+                        }
+                        Keys.onUpPressed: nameField.forceActiveFocus()
+                        Keys.onDownPressed: {
+                            if (roleCombo.currentIndex === 1) specField.forceActiveFocus()
+                        }
                     }
 
                     // 医生专属字段
@@ -240,6 +253,9 @@ Item {
                             id: specField
                             Layout.fillWidth: true
                             placeholderText: "擅长领域 (如: 抑郁症, 焦虑)"
+                            onAccepted: introField.forceActiveFocus()
+                            Keys.onUpPressed: passField.forceActiveFocus()
+                            Keys.onDownPressed: introField.forceActiveFocus()
                         }
                         
                         TextArea {
@@ -249,6 +265,9 @@ Item {
                             placeholderText: "医生个人简介..."
                             color: Theme.textSecondary
                             background: Rectangle { border.color: Theme.border; radius: 4 }
+                            KeyNavigation.priority: KeyNavigation.BeforeItem
+                            KeyNavigation.tab: submitBtn
+                            KeyNavigation.backtab: specField
                         }
                     }
 
@@ -259,11 +278,14 @@ Item {
                         spacing: 20
 
                         Button {
+                            id: submitBtn
                             text: isEditMode ? "保存修改" : "立即创建"
                             Layout.fillWidth: true
                             Layout.preferredHeight: 45
                             highlighted: true
                             onClicked: submitForm()
+                            Keys.onReturnPressed: clicked()
+                            Keys.onEnterPressed: clicked()
                         }
 
                         // 删除按钮 (仅编辑模式显示)

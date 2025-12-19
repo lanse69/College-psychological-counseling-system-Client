@@ -8,6 +8,8 @@ Item {
     property var controller: null
     property var selectedStudent: null
 
+    property var allPatients: []
+
     // 学生列表模型
     ListModel { id: studentListModel }
     // 历史记录模型
@@ -24,14 +26,30 @@ Item {
         if (selectedStudent) controller.fetchPatientHistory(selectedStudent.userId)
     }
 
+    // 过滤
+    function filterStudentList() {
+        var keyword = searchField.text.trim().toLowerCase()
+        studentListModel.clear()
+        
+        for (var i = 0; i < tabRoot.allPatients.length; i++) {
+            var item = tabRoot.allPatients[i]
+            var name = (item.realName || "").toLowerCase()
+            
+            // 匹配姓名
+            if (keyword === "" || name.indexOf(keyword) !== -1) {
+                studentListModel.append(item)
+            }
+        }
+    }
+
     Connections {
         target: controller
         
         function onPatientListReceived(list) {
-            studentListModel.clear()
-            for(var i=0; i<list.length; i++) {
-                studentListModel.append(list[i])
-            }
+            // 将数据存入 JS 数组缓存
+            tabRoot.allPatients = list
+            // 执行过滤并显示
+            filterStudentList()
         }
         
         function onPatientHistoryReceived(list) {
@@ -83,6 +101,25 @@ Item {
                         font.bold: true
                         font.pixelSize: 16
                         anchors.centerIn: parent
+                    }
+                }
+
+                // 搜索框
+                TextField {
+                    id: searchField
+                    Layout.fillWidth: true
+                    Layout.margins: 5
+                    placeholderText: "搜索学生姓名..."
+                    
+                    background: Rectangle {
+                        color: Theme.inputBackground
+                        radius: 4
+                        border.color: Theme.border
+                    }
+                    
+                    onTextChanged: {
+                        // 输入变化时触发过滤
+                        filterStudentList()
                     }
                 }
 
