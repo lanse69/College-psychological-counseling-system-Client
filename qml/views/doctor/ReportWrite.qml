@@ -14,11 +14,33 @@ Page {
     property string studentName: ""
 
     header: ToolBar {
-        Button {
-            text: "返回"
-            onClicked: stackView.pop()
+        background: Rectangle {
+            color: Theme.surface
+            // 底部加分割线
+            Rectangle { 
+                width: parent.width; height: 1; 
+                anchors.bottom: parent.bottom; color: Theme.divider 
+            }
         }
-        Label { text: "咨询结案报告"; anchors.centerIn: parent }
+
+        RowLayout {
+            anchors.fill: parent
+            Button {
+                text: "返回"
+                onClicked: stackView.pop()
+                contentItem: Text { text: parent.text; color: Theme.textPrimary }
+                background: Rectangle { color: "transparent" }
+            }
+            Label { 
+                text: "咨询结案报告"
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+                color: Theme.textPrimary
+                font.bold: true
+                font.pixelSize: 18
+            }
+            Item { width: 50 } 
+        }
     }
 
     DoctorController {

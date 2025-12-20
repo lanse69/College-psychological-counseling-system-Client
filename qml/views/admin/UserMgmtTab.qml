@@ -165,6 +165,62 @@ Item {
                         Layout.fillWidth: true
                         model: ["学生 (Student)", "医生 (Doctor)", "管理员 (Admin)"]
                         enabled: !isEditMode
+
+                        contentItem: Text {
+                            leftPadding: 10
+                            rightPadding: parent.indicator.width + parent.spacing
+                            text: parent.displayText
+                            font: parent.font
+                            color: Theme.textPrimary
+                            verticalAlignment: Text.AlignVCenter
+                            elide: Text.ElideRight
+                        }
+
+                        background: Rectangle {
+                            implicitWidth: 120
+                            implicitHeight: 40
+                            color: Theme.inputBackground
+                            border.color: Theme.border
+                            radius: 4
+                        }
+
+                        // 自定义下拉弹窗列表
+                        popup: Popup {
+                            y: parent.height - 1
+                            width: parent.width
+                            implicitHeight: contentItem.implicitHeight
+                            padding: 1
+
+                            contentItem: ListView {
+                                clip: true
+                                implicitHeight: contentHeight
+                                model: roleCombo.delegateModel
+                                currentIndex: roleCombo.highlightedIndex
+                                ScrollIndicator.vertical: ScrollIndicator { }
+                            }
+
+                            background: Rectangle {
+                                color: Theme.surface
+                                border.color: Theme.border
+                                radius: 4
+                            }
+                        }
+                        
+                        // 下拉列表项的样式
+                        delegate: ItemDelegate {
+                            width: parent.width
+                            contentItem: Text {
+                                text: modelData
+                                color: Theme.textPrimary
+                                font: parent.font
+                                elide: Text.ElideRight
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            background: Rectangle {
+                                color: parent.highlighted ? Theme.surfaceHighlight : "transparent"
+                            }
+                            highlighted: roleCombo.highlightedIndex === index
+                        }
                     }
 
                     // 登录账号
@@ -385,7 +441,51 @@ Item {
         anchors.centerIn: parent
         width: 300
         standardButtons: Dialog.Yes | Dialog.No
-        background: Rectangle { color: Theme.surface; radius: 5 }
+        
+        background: Rectangle {
+            color: Theme.surface
+            border.color: Theme.border
+            radius: 8
+        }
+
+        header: Label {
+            text: parent.title
+            visible: parent.title.length > 0
+            font.bold: true
+            font.pixelSize: 18
+            padding: 15
+            color: Theme.textPrimary
+            background: Rectangle { color: "transparent" }
+        }
+
+        footer: DialogButtonBox {
+            visible: confirmDeleteDialog.standardButtons !== 0
+            standardButtons: confirmDeleteDialog.standardButtons
+            background: Rectangle {
+                color: "transparent"
+                Rectangle { width: parent.width; height: 1; color: Theme.divider; anchors.top: parent.top }
+            }
+            
+            delegate: Button {
+                id: dlgBtn
+                flat: true
+                implicitHeight: 40
+                implicitWidth: 80
+                contentItem: Text {
+                    text: dlgBtn.text
+                    font.bold: true
+                    font.pixelSize: 14
+                    color: (DialogButtonBox.buttonRole === DialogButtonBox.AcceptRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.YesRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.OkRole) 
+                            ? Theme.primary : Theme.textPrimary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle { color: dlgBtn.down ? Theme.surfaceHighlight : "transparent"; radius: 4 }
+            }
+        }
+
         contentItem: Text { 
             text: "确定要永久删除该用户吗？\n此操作不可恢复。" 
             color: Theme.textPrimary

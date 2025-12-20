@@ -57,6 +57,47 @@ Item {
             Layout.fillWidth: true
             model: ["全部状态", "待确认", "已确认", "已完成", "已取消"]
             onActivated: updateList()
+
+            contentItem: Text {
+                leftPadding: 10
+                text: parent.displayText
+                color: Theme.textPrimary
+                verticalAlignment: Text.AlignVCenter
+            }
+            background: Rectangle {
+                color: Theme.inputBackground
+                border.color: Theme.border
+                radius: 4
+            }
+            popup: Popup {
+                y: parent.height - 1
+                width: parent.width
+                implicitHeight: contentItem.implicitHeight
+                padding: 1
+                contentItem: ListView {
+                    clip: true
+                    implicitHeight: contentHeight
+                    model: filterCombo.delegateModel
+                    currentIndex: filterCombo.highlightedIndex
+                }
+                background: Rectangle {
+                    color: Theme.surface
+                    border.color: Theme.border
+                }
+            }
+            delegate: ItemDelegate {
+                width: parent.width
+                contentItem: Text {
+                    text: modelData
+                    color: Theme.textPrimary
+                    font: parent.font
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle {
+                    color: parent.highlighted ? Theme.surfaceHighlight : "transparent"
+                }
+                highlighted: filterCombo.highlightedIndex === index
+            }
         }
 
         // 搜索框
@@ -68,21 +109,36 @@ Item {
             placeholderTextColor: Theme.textPlaceholder
             background: Rectangle { color: Theme.inputBackground; border.color: Theme.border }
             
-            // 监听输入变化，实时搜索
+            // 监听输入变化
             onTextChanged: updateList()
             
-            // 清除按钮
+            // 右侧内边距
             rightPadding: 30
-            Image {
-                // source: "qrc:/assets/icons/close.png"
-                Text {text: "X"}
-                visible: parent.text.length > 0
+            
+            Item {
+                width: 30
+                height: parent.height
                 anchors.right: parent.right
-                anchors.rightMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
+                visible: parent.text.length > 0
+                z: 2
+
+                Text {
+                    text: "✕"
+                    anchors.centerIn: parent
+                    color: clearMa.containsMouse ? Theme.primary : Theme.textPlaceholder
+                    font.bold: true
+                }
+                
                 MouseArea {
+                    id: clearMa
                     anchors.fill: parent
-                    onClicked: searchField.text = ""
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        searchField.text = ""
+                        searchField.forceActiveFocus()
+                    }
                 }
             }
         }
@@ -242,6 +298,50 @@ Item {
         standardButtons: Dialog.Yes | Dialog.No
         Text { text: "确定要拒绝 " + rejectDialog.studentName + " 的预约吗？" }
         onAccepted: controller.rejectAppointment(rejectDialog.targetId)
+
+        background: Rectangle {
+            color: Theme.surface
+            border.color: Theme.border
+            radius: 8
+        }
+
+        header: Label {
+            text: parent.title
+            visible: parent.title.length > 0
+            font.bold: true
+            font.pixelSize: 18
+            padding: 15
+            color: Theme.textPrimary
+            background: Rectangle { color: "transparent" }
+        }
+
+        footer: DialogButtonBox {
+            visible: rejectDialog.standardButtons !== 0
+            standardButtons: rejectDialog.standardButtons
+            background: Rectangle {
+                color: "transparent"
+                Rectangle { width: parent.width; height: 1; color: Theme.divider; anchors.top: parent.top }
+            }
+            
+            delegate: Button {
+                id: dlgBtn
+                flat: true
+                implicitHeight: 40
+                implicitWidth: 80
+                contentItem: Text {
+                    text: dlgBtn.text
+                    font.bold: true
+                    font.pixelSize: 14
+                    color: (DialogButtonBox.buttonRole === DialogButtonBox.AcceptRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.YesRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.OkRole) 
+                            ? Theme.primary : Theme.textPrimary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle { color: dlgBtn.down ? Theme.surfaceHighlight : "transparent"; radius: 4 }
+            }
+        }
     }
 
     Dialog {
@@ -258,6 +358,44 @@ Item {
             border.color: Theme.border
             radius: 8
             implicitWidth: 300
+        }
+
+        header: Label {
+            text: parent.title
+            visible: parent.title.length > 0
+            font.bold: true
+            font.pixelSize: 18
+            padding: 15
+            color: Theme.textPrimary
+            background: Rectangle { color: "transparent" }
+        }
+
+        footer: DialogButtonBox {
+            visible: confirmDeleteDialog.standardButtons !== 0
+            standardButtons: confirmDeleteDialog.standardButtons
+            background: Rectangle {
+                color: "transparent"
+                Rectangle { width: parent.width; height: 1; color: Theme.divider; anchors.top: parent.top }
+            }
+            
+            delegate: Button {
+                id: dlgBtn
+                flat: true
+                implicitHeight: 40
+                implicitWidth: 80
+                contentItem: Text {
+                    text: dlgBtn.text
+                    font.bold: true
+                    font.pixelSize: 14
+                    color: (DialogButtonBox.buttonRole === DialogButtonBox.AcceptRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.YesRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.OkRole) 
+                            ? Theme.primary : Theme.textPrimary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle { color: dlgBtn.down ? Theme.surfaceHighlight : "transparent"; radius: 4 }
+            }
         }
 
         contentItem: Text { 
@@ -292,6 +430,44 @@ Item {
             color: Theme.surface
             border.color: Theme.border
             radius: 8
+        }
+
+        header: Label {
+            text: parent.title
+            visible: parent.title.length > 0
+            font.bold: true
+            font.pixelSize: 18
+            padding: 15
+            color: Theme.textPrimary
+            background: Rectangle { color: "transparent" }
+        }
+
+        footer: DialogButtonBox {
+            visible: surveyDetailDialog.standardButtons !== 0
+            standardButtons: surveyDetailDialog.standardButtons
+            background: Rectangle {
+                color: "transparent"
+                Rectangle { width: parent.width; height: 1; color: Theme.divider; anchors.top: parent.top }
+            }
+            
+            delegate: Button {
+                id: dlgBtn
+                flat: true
+                implicitHeight: 40
+                implicitWidth: 80
+                contentItem: Text {
+                    text: dlgBtn.text
+                    font.bold: true
+                    font.pixelSize: 14
+                    color: (DialogButtonBox.buttonRole === DialogButtonBox.AcceptRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.YesRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.OkRole) 
+                            ? Theme.primary : Theme.textPrimary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle { color: dlgBtn.down ? Theme.surfaceHighlight : "transparent"; radius: 4 }
+            }
         }
 
         contentItem: ColumnLayout {
@@ -386,6 +562,44 @@ Item {
             implicitWidth: 450
         }
 
+        header: Label {
+            text: parent.title
+            visible: parent.title.length > 0
+            font.bold: true
+            font.pixelSize: 18
+            padding: 15
+            color: Theme.textPrimary
+            background: Rectangle { color: "transparent" }
+        }
+
+        footer: DialogButtonBox {
+            visible: modifyDialog.standardButtons !== 0
+            standardButtons: modifyDialog.standardButtons
+            background: Rectangle {
+                color: "transparent"
+                Rectangle { width: parent.width; height: 1; color: Theme.divider; anchors.top: parent.top }
+            }
+            
+            delegate: Button {
+                id: dlgBtn
+                flat: true
+                implicitHeight: 40
+                implicitWidth: 80
+                contentItem: Text {
+                    text: dlgBtn.text
+                    font.bold: true
+                    font.pixelSize: 14
+                    color: (DialogButtonBox.buttonRole === DialogButtonBox.AcceptRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.YesRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.OkRole) 
+                            ? Theme.primary : Theme.textPrimary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle { color: dlgBtn.down ? Theme.surfaceHighlight : "transparent"; radius: 4 }
+            }
+        }
+
         contentItem: ColumnLayout {
             width: parent.width 
             spacing: 20
@@ -454,8 +668,7 @@ Item {
                     spacing: 10
                     
                     Repeater {
-                        model: ["08:30-09:30", "09:30-10:30", "10:30-11:30", 
-                                "14:30-15:30", "15:30-16:30", "16:30-17:30", "17:30-18:30"]
+                        model: tabRoot.controller ? tabRoot.controller.timeSlots : []
                         
                         delegate: Button {
                             text: modelData

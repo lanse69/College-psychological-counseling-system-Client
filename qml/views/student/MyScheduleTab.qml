@@ -72,14 +72,17 @@ Item {
 
             delegate: Rectangle {
                 width: ListView.view.width
-                height: 150
+                height: contentCol.implicitHeight + 30 
                 color: Theme.surface
                 radius: 8
                 border.color: Theme.border
                 border.width: 1
 
                 ColumnLayout {
-                    anchors.fill: parent
+                    id: contentCol
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
                     anchors.margins: 15
                     spacing: 6
 
@@ -275,8 +278,46 @@ Item {
 
         background: Rectangle {
             color: Theme.surface
-            radius: 5
+            radius: 8
             border.color: Theme.border
+        }
+
+        header: Label {
+            text: parent.title
+            visible: parent.title.length > 0
+            font.bold: true
+            font.pixelSize: 18
+            padding: 15
+            color: Theme.textPrimary
+            background: Rectangle { color: "transparent" }
+        }
+
+        footer: DialogButtonBox {
+            visible: modifyDialog.standardButtons !== 0
+            standardButtons: modifyDialog.standardButtons
+            background: Rectangle {
+                color: "transparent"
+                Rectangle { width: parent.width; height: 1; color: Theme.divider; anchors.top: parent.top }
+            }
+            
+            delegate: Button {
+                id: dlgBtn
+                flat: true
+                implicitHeight: 40
+                implicitWidth: 80
+                contentItem: Text {
+                    text: dlgBtn.text
+                    font.bold: true
+                    font.pixelSize: 14
+                    color: (DialogButtonBox.buttonRole === DialogButtonBox.AcceptRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.YesRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.OkRole) 
+                            ? Theme.primary : Theme.textPrimary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle { color: dlgBtn.down ? Theme.surfaceHighlight : "transparent"; radius: 4 }
+            }
         }
 
         contentItem: ColumnLayout {
@@ -325,8 +366,7 @@ Item {
                 Layout.fillWidth: true
                 spacing: 8
                 Repeater {
-                    model: ["08:30-09:30", "09:30-10:30", "10:30-11:30", 
-                                "14:30-15:30", "15:30-16:30", "16:30-17:30", "17:30-18:30"]
+                    model: tabRoot.controller ? tabRoot.controller.timeSlots : []
                     delegate: Button {
                         text: modelData
                         checkable: true
@@ -371,7 +411,45 @@ Item {
         width: 300
         standardButtons: Dialog.Yes | Dialog.No
 
-        background: Rectangle { color: Theme.surface; radius: 5; border.color: Theme.border }
+        background: Rectangle { color: Theme.surface; radius: 8; border.color: Theme.border }
+
+        header: Label {
+            text: parent.title
+            visible: parent.title.length > 0
+            font.bold: true
+            font.pixelSize: 18
+            padding: 15
+            color: Theme.textPrimary
+            background: Rectangle { color: "transparent" }
+        }
+
+        footer: DialogButtonBox {
+            visible: cancelDialog.standardButtons !== 0
+            standardButtons: cancelDialog.standardButtons
+            background: Rectangle {
+                color: "transparent"
+                Rectangle { width: parent.width; height: 1; color: Theme.divider; anchors.top: parent.top }
+            }
+            
+            delegate: Button {
+                id: dlgBtn
+                flat: true
+                implicitHeight: 40
+                implicitWidth: 80
+                contentItem: Text {
+                    text: dlgBtn.text
+                    font.bold: true
+                    font.pixelSize: 14
+                    color: (DialogButtonBox.buttonRole === DialogButtonBox.AcceptRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.YesRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.OkRole) 
+                            ? Theme.primary : Theme.textPrimary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle { color: dlgBtn.down ? Theme.surfaceHighlight : "transparent"; radius: 4 }
+            }
+        }
         
         contentItem: Text { 
             text: "确定要取消此预约吗？"
@@ -393,7 +471,45 @@ Item {
         width: 300
         standardButtons: Dialog.Yes | Dialog.No
         
-        background: Rectangle { color: Theme.surface; radius: 5; border.color: Theme.border }
+        background: Rectangle { color: Theme.surface; radius: 8; border.color: Theme.border }
+
+        header: Label {
+            text: parent.title
+            visible: parent.title.length > 0
+            font.bold: true
+            font.pixelSize: 18
+            padding: 15
+            color: Theme.textPrimary
+            background: Rectangle { color: "transparent" }
+        }
+
+        footer: DialogButtonBox {
+            visible: confirmDeleteDialog.standardButtons !== 0
+            standardButtons: confirmDeleteDialog.standardButtons
+            background: Rectangle {
+                color: "transparent"
+                Rectangle { width: parent.width; height: 1; color: Theme.divider; anchors.top: parent.top }
+            }
+            
+            delegate: Button {
+                id: dlgBtn
+                flat: true
+                implicitHeight: 40
+                implicitWidth: 80
+                contentItem: Text {
+                    text: dlgBtn.text
+                    font.bold: true
+                    font.pixelSize: 14
+                    color: (DialogButtonBox.buttonRole === DialogButtonBox.AcceptRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.YesRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.OkRole) 
+                            ? Theme.primary : Theme.textPrimary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle { color: dlgBtn.down ? Theme.surfaceHighlight : "transparent"; radius: 4 }
+            }
+        }
         
         contentItem: Text {
             text: "确定要彻底删除这条预约记录吗？"
@@ -426,8 +542,46 @@ Item {
         
         background: Rectangle {
             color: Theme.surface
-            radius: 5
+            radius: 8
             border.color: Theme.border
+        }
+
+        header: Label {
+            text: parent.title
+            visible: parent.title.length > 0
+            font.bold: true
+            font.pixelSize: 18
+            padding: 15
+            color: Theme.textPrimary
+            background: Rectangle { color: "transparent" }
+        }
+
+        footer: DialogButtonBox {
+            visible: reportDetailDialog.standardButtons !== 0
+            standardButtons: reportDetailDialog.standardButtons
+            background: Rectangle {
+                color: "transparent"
+                Rectangle { width: parent.width; height: 1; color: Theme.divider; anchors.top: parent.top }
+            }
+            
+            delegate: Button {
+                id: dlgBtn
+                flat: true
+                implicitHeight: 40
+                implicitWidth: 80
+                contentItem: Text {
+                    text: dlgBtn.text
+                    font.bold: true
+                    font.pixelSize: 14
+                    color: (DialogButtonBox.buttonRole === DialogButtonBox.AcceptRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.YesRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.OkRole) 
+                            ? Theme.primary : Theme.textPrimary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle { color: dlgBtn.down ? Theme.surfaceHighlight : "transparent"; radius: 4 }
+            }
         }
 
         contentItem: ScrollView {

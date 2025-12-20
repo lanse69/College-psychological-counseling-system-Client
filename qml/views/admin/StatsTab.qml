@@ -58,38 +58,28 @@ Item {
             }
             
             ButtonGroup { id: chartGroup }
-            
-            Button {
-                text: "咨询趋势"
-                checkable: true
-                checked: true
-                ButtonGroup.group: chartGroup
-                onClicked: fetchData("consult_trend")
-            }
-            Button {
-                text: "热门问题"
+
+            component StatsButton: Button {
                 checkable: true
                 ButtonGroup.group: chartGroup
-                onClicked: fetchData("common_issues")
+                contentItem: Text {
+                    text: parent.text
+                    color: parent.checked ? Theme.textPrimary : Theme.textSecondary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle {
+                    color: parent.checked ? Theme.primary : Theme.surface
+                    border.color: Theme.border
+                    radius: 4
+                }
             }
-            Button {
-                text: "学生性别"
-                checkable: true
-                ButtonGroup.group: chartGroup
-                onClicked: fetchData("student_gender")
-            }
-            Button {
-                text: "热门医生"
-                checkable: true
-                ButtonGroup.group: chartGroup
-                onClicked: fetchData("top_doctors")
-            }
-            Button {
-                text: "时段热力"
-                checkable: true
-                ButtonGroup.group: chartGroup
-                onClicked: fetchData("peak_times")
-            }
+
+            StatsButton { text: "咨询趋势"; checked: true; onClicked: fetchData("consult_trend") }
+            StatsButton { text: "热门问题"; onClicked: fetchData("common_issues") }
+            StatsButton { text: "学生性别"; checked: true; onClicked: fetchData("student_gender") }
+            StatsButton { text: "热门医生"; onClicked: fetchData("top_doctors") }
+            StatsButton { text: "时段热力"; onClicked: fetchData("peak_times") }
             // TODO: 其他
             Button {
                 text: "刷新"

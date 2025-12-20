@@ -2,29 +2,9 @@
 
 #include <QDebug>
 #include <QTimer>
-#include <QDateTime>
 
 #include "network/NetworkClient.h"
 #include "network/PacketDispatcher.h"
-#include "config/ProtocolDefs.h"
-
-static bool isTimePassed(const QString &dateStr, int slot) {
-    QDate date = QDate::fromString(dateStr, Qt::ISODate);
-    if (!date.isValid()) date = QDate::fromString(dateStr, "yyyy-M-d"); 
-    if (!date.isValid()) return true;
-
-    QDateTime now = QDateTime::currentDateTime();
-    if (date < now.date()) return true;
-    if (date > now.date()) return false;
-
-    int h = 0;
-    switch(slot) {
-        case 0: h = 8; break; case 1: h = 9; break; case 2: h = 10; break;
-        case 3: h = 14; break; case 4: h = 15; break; case 5: h = 16; break; case 6: h = 17; break;
-        default: return true;
-    }
-    return now.time() >= QTime(h, 30);
-}
 
 DoctorController::DoctorController(QObject *parent) : BaseController(parent), m_bookingModel(new BookingModel(this))
 {
@@ -48,7 +28,7 @@ void DoctorController::updateMyProfile(const QString &realName, const QString &p
     QJsonObject data;
     data[JsonKeys::TARGET_ID] = myId;
     data[JsonKeys::REAL_NAME] = realName;
-    data[JsonKeys::PASSWORD] = password;
+    data[JsonKeys::PASSWORD] = hashPassword(password);
     data[JsonKeys::INTRO] = intro;
     data[JsonKeys::SPEC] = spec;
     
@@ -135,7 +115,7 @@ void DoctorController::requestModification(int appointmentId, const QString &new
         emit operationResult(false, "参数无效");
         return;
     }
-    if (isTimePassed(newDate, newSlot)) {
+    if (IsTimeSlotExpired(newDate, newSlot)) {
         emit operationResult(false, "不能修改到已经过去的时间");
         return;
     }

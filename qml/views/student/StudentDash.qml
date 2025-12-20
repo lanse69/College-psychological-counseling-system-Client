@@ -63,27 +63,34 @@ Page {
             Layout.fillWidth: true
             background: Rectangle { color: Theme.surface }
 
-            TabButton { 
-                text: "医生"
+            component SkinTabButton: TabButton {
+                id: tBtn
+                
                 contentItem: Text {
-                    text: parent.text
-                    color: parent.checked ? Theme.primary : Theme.textSecondary
+                    text: tBtn.text
+                    font: tBtn.font
+                    // 选中变色，未选中为次要文字色
+                    color: tBtn.checked ? Theme.primary : Theme.textSecondary
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
+                    elide: Text.ElideRight
                 }
-                background: Rectangle { color: "transparent" }
+                background: Rectangle {
+                    // 选中时显示高亮背景，否则透明
+                    color: tBtn.checked ? Theme.surfaceHighlight : "transparent"
+                    // 底部指示条
+                    Rectangle {
+                        width: parent.width
+                        height: 2
+                        anchors.bottom: parent.bottom
+                        color: Theme.primary
+                        visible: tBtn.checked
+                    }
+                }
             }
 
-            TabButton { 
-                text: "我的预约"
-                contentItem: Text {
-                    text: parent.text
-                    color: parent.checked ? Theme.primary : Theme.textSecondary
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-                background: Rectangle { color: "transparent" }
-            }
+            SkinTabButton { text: "医生列表" }
+            SkinTabButton { text: "我的预约" }
         }
 
         StackLayout {
@@ -93,7 +100,7 @@ Page {
 
             // 医生列表页
             DoctorListTab {
-                controller: studentCtrl // 将 controller 传进去
+                controller: studentCtrl
             }
 
             // 我的预约页

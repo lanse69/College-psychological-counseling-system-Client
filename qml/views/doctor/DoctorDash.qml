@@ -59,10 +59,36 @@ Page {
         TabBar {
             id: bar
             Layout.fillWidth: true
-            
-            TabButton { text: "预约处理" }
-            TabButton { text: "预约学生档案" }
-            TabButton { text: "个人中心" }
+
+            component SkinTabButton: TabButton {
+                id: tBtn
+                
+                contentItem: Text {
+                    text: tBtn.text
+                    font: tBtn.font
+                    // 选中变色，未选中为次要文字色
+                    color: tBtn.checked ? Theme.primary : Theme.textSecondary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    elide: Text.ElideRight
+                }
+                background: Rectangle {
+                    // 选中时显示高亮背景，否则透明
+                    color: tBtn.checked ? Theme.surfaceHighlight : "transparent"
+                    // 底部指示条
+                    Rectangle {
+                        width: parent.width
+                        height: 2
+                        anchors.bottom: parent.bottom
+                        color: Theme.primary
+                        visible: tBtn.checked
+                    }
+                }
+            }
+
+            SkinTabButton { text: "预约处理" }
+            SkinTabButton { text: "预约学生档案" }
+            SkinTabButton { text: "个人中心" }
         }
 
         StackLayout {

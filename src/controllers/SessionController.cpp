@@ -1,6 +1,5 @@
 #include "SessionController.h"
 
-#include <QCryptographicHash>
 #include <QDebug>
 
 #include "network/NetworkClient.h"
@@ -51,12 +50,9 @@ void SessionController::login(const QString &username, const QString &password) 
         return;
     }
 
-    // 客户端先进行一次 Hash，避免明文传输
-    QString passwordHash = QString(QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256).toHex());
-
     QJsonObject data;
     data[JsonKeys::USERNAME] = username;
-    data[JsonKeys::PASSWORD] = passwordHash; // Hash
+    data[JsonKeys::PASSWORD] = hashPassword(password);
     
     sendRequest(CmdType::LOGIN, data);
 }

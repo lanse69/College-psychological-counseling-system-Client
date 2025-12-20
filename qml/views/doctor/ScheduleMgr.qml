@@ -6,29 +6,34 @@ import PsyClient
 Page {
     id: root
 
-    readonly property var timeSlotLabels: [
-        "08:30 - 09:30", "09:30 - 10:30", "10:30 - 11:30",
-        "14:30 - 15:30", "15:30 - 16:30", "16:30 - 17:30", "17:30 - 18:30"
-    ]
-
     property var currentMonth: new Date()
     property var selectedDate: null
     property int currentDayMask: 0 
-    
     property var scheduleCache: ({}) 
 
     header: ToolBar {
-        Button {
-            text: "返回"
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
-            onClicked: stackView.pop()
+        background: Rectangle {
+            color: Theme.surface
+            Rectangle { width: parent.width; height: 1; anchors.bottom: parent.bottom; color: Theme.divider }
         }
-        Label {
-            text: "日程安排管理"
-            font.pixelSize: 20
-            anchors.centerIn: parent
+        
+        RowLayout {
+            anchors.fill: parent
+            Button {
+                text: "返回"
+                onClicked: stackView.pop()
+                contentItem: Text { text: parent.text; color: Theme.textPrimary }
+                background: Rectangle { color: "transparent" }
+            }
+            Label {
+                text: "日程安排管理"
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+                font.pixelSize: 20
+                font.bold: true
+                color: Theme.textPrimary
+            }
+            Item { width: 50 }
         }
     }
 
@@ -223,6 +228,44 @@ Page {
             radius: 8
         }
 
+        header: Label {
+            text: parent.title
+            visible: parent.title.length > 0
+            font.bold: true
+            font.pixelSize: 18
+            padding: 15
+            color: Theme.textPrimary
+            background: Rectangle { color: "transparent" }
+        }
+
+        footer: DialogButtonBox {
+            visible: dateDetailDialog.standardButtons !== 0
+            standardButtons: dateDetailDialog.standardButtons
+            background: Rectangle {
+                color: "transparent"
+                Rectangle { width: parent.width; height: 1; color: Theme.divider; anchors.top: parent.top }
+            }
+            
+            delegate: Button {
+                id: dlgBtn
+                flat: true
+                implicitHeight: 40
+                implicitWidth: 80
+                contentItem: Text {
+                    text: dlgBtn.text
+                    font.bold: true
+                    font.pixelSize: 14
+                    color: (DialogButtonBox.buttonRole === DialogButtonBox.AcceptRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.YesRole || 
+                            DialogButtonBox.buttonRole === DialogButtonBox.OkRole) 
+                            ? Theme.primary : Theme.textPrimary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle { color: dlgBtn.down ? Theme.surfaceHighlight : "transparent"; radius: 4 }
+            }
+        }
+
         contentItem: ColumnLayout {
             spacing: 15
 
@@ -248,7 +291,7 @@ Page {
                     spacing: 0
 
                     Repeater {
-                        model: timeSlotLabels
+                        model: doctorCtrl.timeSlots
                         delegate: ItemDelegate {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 50

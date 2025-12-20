@@ -1,31 +1,9 @@
 #include "StudentController.h"
 
 #include <QDebug>
-#include <QDate>
-#include <QDateTime> 
 
 #include "network/NetworkClient.h"
 #include "network/PacketDispatcher.h"
-#include "config/ProtocolDefs.h"
-
-static bool isTimePassed(const QString &dateStr, int slot) {
-    QDate date = QDate::fromString(dateStr, Qt::ISODate);
-    if (!date.isValid()) date = QDate::fromString(dateStr, "yyyy-M-d"); 
-    if (!date.isValid()) return true;
-
-    QDateTime now = QDateTime::currentDateTime();
-    if (date < now.date()) return true;
-    if (date > now.date()) return false;
-
-    // 今天：判断时间
-    int h = 0;
-    switch(slot) {
-        case 0: h = 8; break; case 1: h = 9; break; case 2: h = 10; break;
-        case 3: h = 14; break; case 4: h = 15; break; case 5: h = 16; break; case 6: h = 17; break;
-        default: return true;
-    }
-    return now.time() >= QTime(h, 30);
-}
 
 StudentController::StudentController(QObject *parent) : BaseController(parent)
 {
@@ -60,39 +38,17 @@ void StudentController::bookAppointment(int doctorId, const QString &date, int t
         return;
     }
 
-    // 尝试解析用户输入的日期
-    QDate qDate = QDate::fromString(date, Qt::ISODate);
-    if (!qDate.isValid()) {
-        qDate = QDate::fromString(date, "yyyy/MM/dd");
-    }
-    
-    // 允许用户输入不带前导零的日期
-    if (!qDate.isValid()) {
-        qDate = QDate::fromString(date, "yyyy-M-d"); 
-    }
-
-    if (!qDate.isValid()) {
-        emit operationResult(false, "日期格式错误，请输入 YYYY-MM-DD");
-        return;
-    }
-
-    if (qDate < QDate::currentDate()) {
-        emit operationResult(false, "无法预约过去的日期");
-        return;
-    }
-
-    // 检查时间段
-    if (isTimePassed(date, timeSlot)) {
+    if (IsTimeSlotExpired(date, timeSlot)) {
         emit operationResult(false, "该时间段已过，请选择未来的时间");
         return;
     }
 
-    // 转换为标准 ISO 字符串
-    QString standardDate = qDate.toString(Qt::ISODate);
+    QDate qDate = QDate::fromString(date, Qt::ISODate);
+    if (!qDate.isValid()) qDate = QDate::fromString(date, "yyyy-M-d"); // 兼容
     
     QJsonObject data;
     data[JsonKeys::DOCTOR_ID] = doctorId;
-    data["date"] = standardDate;
+    data["date"] = qDate.toString(Qt::ISODate);
     data["timeSlot"] = timeSlot;
     
     sendRequest(CmdType::STUDENT_BOOK_APPOINTMENT, data);
@@ -122,34 +78,24 @@ void StudentController::modifyAppointment(int appointmentId, const QString &newD
         return;
     }
 
-    // 校验日期格式
-    QDate qDate = QDate::fromString(newDate, Qt::ISODate);
-    if (!qDate.isValid()) {
-        qDate = QDate::fromString(newDate, "yyyy-M-d");
-    }
-    
-    if (!qDate.isValid() || qDate < QDate::currentDate()) {
+    if (IsTimeSlotExpired(newDate, newSlot)) {
         emit operationResult(false, "日期无效或不能选择过去的时间");
         return;
     }
     
-    if (newSlot < 0 || newSlot > 6) {
+    if (newSlot < 0 || newSlot >= TIME_SLOT_COUNT) {
         emit operationResult(false, "无效的时间段");
         return;
     }
 
-    // 检查时间段
-    if (isTimePassed(newDate, newSlot)) {
-        emit operationResult(false, "不能修改到已经过去的时间");
-        return;
-    }
+    QDate qDate = QDate::fromString(newDate, Qt::ISODate); 
+    if (!qDate.isValid()) qDate = QDate::fromString(newDate, "yyyy-M-d");
 
     QJsonObject data;
     data[JsonKeys::APPOINTMENT_ID] = appointmentId;
     data["date"] = qDate.toString(Qt::ISODate);
     data["timeSlot"] = newSlot;
 
-    // 发送 MODIFY_BOOKING_DIRECT 指令
     sendRequest(CmdType::MODIFY_BOOKING_DIRECT, data);
 }
 

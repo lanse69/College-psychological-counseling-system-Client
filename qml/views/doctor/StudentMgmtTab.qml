@@ -112,6 +112,8 @@ Item {
                     placeholderText: "搜索学生姓名..."
                     placeholderTextColor: Theme.textPlaceholder
                     color: Theme.textPrimary
+
+                    rightPadding: 30 
                     
                     background: Rectangle {
                         color: Theme.inputBackground
@@ -122,6 +124,36 @@ Item {
                     onTextChanged: {
                         // 输入变化时触发过滤
                         filterStudentList()
+                    }
+
+                    // 清除按钮
+                    Item {
+                        id: clearBtn
+                        width: 30
+                        height: parent.height
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: searchField.text.length > 0
+                        z: 2
+
+                        Text {
+                            text: "✕"
+                            color: ma.containsMouse ? Theme.primary : Theme.textPlaceholder
+                            font.pixelSize: 14
+                            font.bold: true
+                            anchors.centerIn: parent
+                        }
+
+                        MouseArea {
+                            id: ma
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                searchField.text = ""
+                                searchField.forceActiveFocus() // 点击后保持输入框焦点
+                            }
+                        }
                     }
                 }
 
