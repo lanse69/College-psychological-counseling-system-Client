@@ -144,6 +144,7 @@ Page {
                     Layout.fillWidth: true
                     color: Theme.textPrimary
                     placeholderText: "YYYY-MM-DD"
+                    placeholderTextColor: Theme.textPlaceholder
                     background: Rectangle {
                         color: Theme.inputBackground
                         border.color: Theme.border

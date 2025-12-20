@@ -110,6 +110,8 @@ Item {
                     Layout.fillWidth: true
                     Layout.margins: 5
                     placeholderText: "搜索学生姓名..."
+                    placeholderTextColor: Theme.textPlaceholder
+                    color: Theme.textPrimary
                     
                     background: Rectangle {
                         color: Theme.inputBackground

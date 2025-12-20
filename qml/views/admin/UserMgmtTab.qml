@@ -173,6 +173,7 @@ Item {
                         id: userField
                         Layout.fillWidth: true
                         placeholderText: "用于登录的唯一账号"
+                        placeholderTextColor: Theme.textPlaceholder
                         readOnly: isEditMode
                         color: readOnly ? Theme.textPrimary : Theme.textSecondary
                         background: Rectangle { color: parent.readOnly ? Theme.background : Theme.inputBackground; border.color: Theme.border }
@@ -186,6 +187,9 @@ Item {
                         id: nameField
                         Layout.fillWidth: true
                         placeholderText: "用户真实姓名"
+                        color: Theme.textPrimary
+                        placeholderTextColor: Theme.textPlaceholder
+                        background: Rectangle { color: Theme.inputBackground; border.color: Theme.border }
                         onAccepted: passField.forceActiveFocus()
                         Keys.onUpPressed: userField.forceActiveFocus()
                         Keys.onDownPressed: passField.forceActiveFocus()
@@ -230,6 +234,9 @@ Item {
                         Layout.fillWidth: true
                         echoMode: TextInput.Password
                         placeholderText: isEditMode ? "******" : "必填"
+                        color: Theme.textPrimary
+                        placeholderTextColor: Theme.textPlaceholder
+                        background: Rectangle { color: Theme.inputBackground; border.color: Theme.border }
                         onAccepted: {
                             if (roleCombo.currentIndex === 1) specField.forceActiveFocus() // 是医生 -> 去擅长领域
                             else submitForm() // 不是医生 -> 直接提交
@@ -253,6 +260,9 @@ Item {
                             id: specField
                             Layout.fillWidth: true
                             placeholderText: "擅长领域 (如: 抑郁症, 焦虑)"
+                            color: Theme.textPrimary
+                            placeholderTextColor: Theme.textPlaceholder
+                            background: Rectangle { color: Theme.inputBackground; border.color: Theme.border }
                             onAccepted: introField.forceActiveFocus()
                             Keys.onUpPressed: passField.forceActiveFocus()
                             Keys.onDownPressed: introField.forceActiveFocus()
@@ -263,8 +273,9 @@ Item {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 100
                             placeholderText: "医生个人简介..."
-                            color: Theme.textSecondary
-                            background: Rectangle { border.color: Theme.border; radius: 4 }
+                            color: Theme.textPrimary
+                            placeholderTextColor: Theme.textPlaceholder
+                            background: Rectangle { color: Theme.inputBackground; border.color: Theme.border; radius: 4}
                             KeyNavigation.priority: KeyNavigation.BeforeItem
                             KeyNavigation.tab: submitBtn
                             KeyNavigation.backtab: specField

@@ -241,7 +241,6 @@ Page {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 100
                             placeholderText: "选项1\n选项2\n选项3\n选项4"
-                            
                             color: Theme.textPrimary
                             placeholderTextColor: Theme.textPlaceholder
                             background: Rectangle { 

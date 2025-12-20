@@ -46,7 +46,7 @@ Item {
         spacing: 10
 
         RowLayout {
-            Label { text: "预约列表"; font.bold: true; font.pixelSize: 20 }
+            Label { text: "预约列表"; font.bold: true; font.pixelSize: 20; color: Theme.textPrimary}
             Item { Layout.fillWidth: true }
             Button { text: "刷新列表"; onClicked: refresh() }
         }
@@ -64,6 +64,9 @@ Item {
             id: searchField
             Layout.fillWidth: true
             placeholderText: "搜索学生姓名..."
+            color: Theme.textPrimary
+            placeholderTextColor: Theme.textPlaceholder
+            background: Rectangle { color: Theme.inputBackground; border.color: Theme.border }
             
             // 监听输入变化，实时搜索
             onTextChanged: updateList()
@@ -406,7 +409,8 @@ Item {
                     TextField {
                         id: dateField
                         Layout.fillWidth: true
-                        placeholderText: "例如: 2025-05-20"
+                        placeholderText: "例如: 2026-05-20"
+                        placeholderTextColor: Theme.textPlaceholder
                         text: Qt.formatDate(new Date(), "yyyy-MM-dd") // 默认今天
                         color: Theme.textPrimary
                         background: Rectangle {

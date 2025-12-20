@@ -6,6 +6,8 @@ import PsyClient
 Page {
     id: root
 
+    background: Rectangle { color: Theme.background}
+
     header: ToolBar {
         height: 60
         topPadding: 10

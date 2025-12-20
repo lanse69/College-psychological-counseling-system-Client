@@ -7,6 +7,8 @@ Page {
     id: root
     title: "撰写咨询报告"
     
+    background: Rectangle { color: Theme.background}
+    
     // 接收参数
     property int appointmentId: 0
     property string studentName: ""
@@ -49,46 +51,52 @@ Page {
                 color: Theme.textPrimary
             }
 
-            Label { text: "1. 主要问题描述" }
+            Label { text: "1. 主要问题描述"; color: Theme.textPrimary}
             TextArea {
                 id: problemArea
                 Layout.fillWidth: true; Layout.preferredHeight: 100
                 placeholderText: "描述预约学生的主要诉求、症状表现..."
-                color: Theme.textSecondary
-                background: Rectangle { border.color: Theme.border; radius: 4 }
+                color: Theme.textPrimary
+                placeholderTextColor: Theme.textPlaceholder
+                background: Rectangle { color: Theme.inputBackground; border.color: Theme.border; radius: 4 }
                 activeFocusOnTab: true
                 KeyNavigation.tab: processArea
             }
 
-            Label { text: "2. 咨询过程摘要" }
+            Label { text: "2. 咨询过程摘要"; color: Theme.textPrimary}
             TextArea {
                 id: processArea
                 Layout.fillWidth: true; Layout.preferredHeight: 120
                 placeholderText: "使用了什么疗法，互动情况如何..."
-                color: Theme.textSecondary
-                background: Rectangle { border.color: Theme.border; radius: 4 }
+                color: Theme.textPrimary
+                placeholderTextColor: Theme.textPlaceholder
+                background: Rectangle { color: Theme.inputBackground; border.color: Theme.border; radius: 4 }
                 activeFocusOnTab: true
                 KeyNavigation.tab: suggestArea
                 KeyNavigation.backtab: problemArea
             }
 
-            Label { text: "3. 评估与建议" }
+            Label { text: "3. 评估与建议"; color: Theme.textPrimary}
             TextArea {
                 id: suggestArea
                 Layout.fillWidth: true; Layout.preferredHeight: 100
                 placeholderText: "专业评估结论及后续建议..."
-                color: Theme.textSecondary
-                background: Rectangle { border.color: Theme.border; radius: 4 }
+                color: Theme.textPrimary
+                placeholderTextColor: Theme.textPlaceholder
+                background: Rectangle { color: Theme.inputBackground; border.color: Theme.border; radius: 4 }
                 activeFocusOnTab: true
                 KeyNavigation.tab: tagsField
                 KeyNavigation.backtab: processArea
             }
             
-            Label { text: "4. 结果标签 (用于统计, 逗号分隔)" }
+            Label { text: "4. 结果标签 (用于统计, 逗号分隔)"; color: Theme.textPrimary}
             TextField {
                 id: tagsField
                 Layout.fillWidth: true
                 placeholderText: "例如: 学业压力, 人际关系, 轻度焦虑"
+                placeholderTextColor: Theme.textPlaceholder
+                color: Theme.textPrimary
+                background: Rectangle { color: Theme.inputBackground; border.color: Theme.border }
                 onAccepted: submitBtn.clicked()
                 Keys.onUpPressed: suggestArea.forceActiveFocus()
                 Keys.onDownPressed: submitBtn.forceActiveFocus()

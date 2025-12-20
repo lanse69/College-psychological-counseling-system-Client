@@ -38,6 +38,7 @@ Item {
                 font.bold: true
                 font.pixelSize: 22
                 Layout.alignment: Qt.AlignHCenter
+                color: Theme.textPrimary
             }
 
             // 功能入口区
@@ -66,11 +67,14 @@ Item {
 
             Rectangle { height: 1; Layout.fillWidth: true; color: Theme.divider; Layout.topMargin: 10; Layout.bottomMargin: 10 }
 
-            Label { text: "基本资料修改"; font.bold: true; font.pixelSize: 16 }
+            Label { text: "基本资料修改"; font.bold: true; font.pixelSize: 16; color: Theme.textPrimary}
 
             TextField {
                 id: nameField
                 placeholderText: "真实姓名"
+                color: Theme.textPrimary
+                placeholderTextColor: Theme.textPlaceholder
+                background: Rectangle { color: Theme.inputBackground; border.color: Theme.border }
                 Layout.fillWidth: true
                 onAccepted: specField.forceActiveFocus()
                 Keys.onDownPressed: specField.forceActiveFocus()
@@ -79,6 +83,9 @@ Item {
             TextField {
                 id: specField
                 placeholderText: "擅长领域 (如: 抑郁症, 焦虑, 学业压力)"
+                placeholderTextColor: Theme.textPlaceholder
+                background: Rectangle { color: Theme.inputBackground; border.color: Theme.border }
+                color: Theme.textPrimary
                 Layout.fillWidth: true
                 onAccepted: introField.forceActiveFocus()
                 Keys.onUpPressed: nameField.forceActiveFocus()
@@ -88,10 +95,11 @@ Item {
             TextArea {
                 id: introField
                 placeholderText: "个人简介 (展示给预约学生)..."
-                color: Theme.textSecondary
+                color: Theme.textPrimary
+                placeholderTextColor: Theme.textPlaceholder
                 Layout.fillWidth: true
                 Layout.preferredHeight: 100
-                background: Rectangle { border.color: Theme.divider; radius: 4 }
+                background: Rectangle { color: Theme.inputBackground; border.color: Theme.border; radius: 4 }
                 KeyNavigation.priority: KeyNavigation.BeforeItem
                 KeyNavigation.tab: passField
                 KeyNavigation.backtab: specField
@@ -100,6 +108,9 @@ Item {
             TextField {
                 id: passField
                 placeholderText: "新密码 (留空则不修改)"
+                color: Theme.textPrimary
+                placeholderTextColor: Theme.textPlaceholder
+                background: Rectangle { color: Theme.inputBackground; border.color: Theme.border }
                 echoMode: TextInput.Password
                 Layout.fillWidth: true
                 onAccepted: saveBtn.clicked()

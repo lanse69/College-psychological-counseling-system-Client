@@ -44,10 +44,6 @@ void DoctorController::updateMyProfile(const QString &realName, const QString &p
                                        const QString &intro, const QString &spec) 
 {
     int myId = m_myProfile["id"].toInt();
-    if (myId == 0) {
-        emit operationResult(false, "未获取到用户信息，请先刷新");
-        return;
-    }
 
     QJsonObject data;
     data[JsonKeys::TARGET_ID] = myId;

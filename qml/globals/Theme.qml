@@ -26,7 +26,7 @@ QtObject {
     // 反色文字 (用于深色按钮上的文字)
     property color textInverted: "#ffffff"
     // 占位符文字
-    property color textPlaceholder: isDark ? "#666666" : "#aab2bd"
+    property color textPlaceholder: isDark ? "#9e9e9e" : "#757575"
 
     // 线条与边框
     property color divider: isDark ? "#2c2c2c" : "#e0e0e0"
